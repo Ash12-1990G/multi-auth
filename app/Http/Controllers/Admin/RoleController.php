@@ -28,7 +28,7 @@ class RoleController extends Controller
     
     public function create()
     {
-        $permission = Permission::get();
+        $permission = Permission::where('id','>',10)->get();
         return view('admin.roles.create',compact('permission'));
     }
     
@@ -70,9 +70,7 @@ class RoleController extends Controller
   
     public function update(Request $request, $id)
     {
-        if(Auth::id()==1){
-            return redirect()->route('roles.index');
-        }
+        
         $this->validate($request, [
             'name' => 'required|unique:roles,name,'.$id,
             'permission' => 'required',
@@ -90,13 +88,12 @@ class RoleController extends Controller
     
     public function destroy($id)
     {
-        if(Auth::id()!=1){
+        
             Role::find($id)->delete();
         
             return redirect()->route('roles.index')
             ->with('success', 'Role deleted successfully');
-        }
-        return redirect()->route('roles.index');
+       
         
     }
 
