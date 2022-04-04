@@ -46,7 +46,7 @@
                                 <td>{{ $role->name }}</td>
                                 <td>
                                     <a class="btn btn-success btn-sm" href="{{ route('roles.show',$role->id) }}">Show</a>
-                                    @if($role->name == 'super-admin' || $role->name == 'Franchise-Admin' || $role->name == 'Student-Admin')
+                                    @if($role->name !== 'super-admin' || $role->name !== 'Franchise-Admin' || $role->name !== 'Student-Admin')
                                     @can('role-edit')
                                         <a class="btn btn-primary btn-sm" href="{{ route('roles.edit',$role->id) }}">Edit</a>
                                     @endcan
