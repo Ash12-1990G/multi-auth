@@ -9,6 +9,7 @@ use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use App\Jobs\SendEmailJob;
+use Carbon\Carbon;
 
 class RegisterController extends Controller
 {
@@ -71,7 +72,7 @@ class RegisterController extends Controller
         $user =  User::create([
             'name' => $data['name'],
             'email' => $data['email'],
-            'email_verified_at' => Carbon\Carbon::now(),
+            'email_verified_at' => Carbon::now(),
             'password' => $password,
         ]);
         // $mailData = [
