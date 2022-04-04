@@ -29,7 +29,7 @@ use Illuminate\Foundation\Auth\EmailVerificationRequest;
 */
 
 Route::get('/', function () {
-    return view('frontend.index');
+    return view('index');
 });
 
 Auth::routes(['verify' => true]);
