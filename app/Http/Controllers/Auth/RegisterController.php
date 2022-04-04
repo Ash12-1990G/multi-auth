@@ -71,15 +71,16 @@ class RegisterController extends Controller
         $user =  User::create([
             'name' => $data['name'],
             'email' => $data['email'],
+            'email_verified_at' => Carbon\Carbon::now(),
             'password' => $password,
         ]);
-        $mailData = [
-            'name' => $data['name'],
-            'type' => 'super-admin',
-            'email' => $data['email'],
-            'password' => $password
-        ];
-        dispatch(new SendEmailJob($mailData));
+        // $mailData = [
+        //     'name' => $data['name'],
+        //     'type' => 'super-admin',
+        //     'email' => $data['email'],
+        //     'password' => $password
+        // ];
+        //dispatch(new SendEmailJob($mailData));
         //$user->assignRole('Operator');
         return $user;
     }
