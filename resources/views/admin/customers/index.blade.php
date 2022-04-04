@@ -97,4 +97,9 @@
   swal("Great job!","{{$msg}}",'success');
 </script>
 @endif
+@if($msg = session('warning'))
+<script type="text/javascript">
+  swal("Attention!","{{$msg}}",'warning');
+</script>
+@endif
 @endsection

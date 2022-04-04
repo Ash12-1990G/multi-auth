@@ -67,7 +67,7 @@
                                 <p class="fw-bold form-sub-heading border-bottom  text-primary">Start-up Location</p>
                                 <label  class="form-label">Location</label>
                                 
-                                <textarea name="location"  class="form-control {{ $errors->has('location') ? ' is-invalid' : '' }}">{{old('location')}}</textarea>
+                                <textarea name="location"  class="form-control {{ $errors->has('location') ? ' is-invalid' : '' }}">{{old('location',$customer->location)}}</textarea>
                                 @if ($errors->has('location'))
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $errors->first('location') }}.</strong>
@@ -130,7 +130,14 @@
         </div>
     </div>
 </div>
+@endsection
 @section('scripts')
 <script src="{{ asset('js/eachWordUpper.js') }}"></script>
+<script type="text/javascript" src="{{ asset('js/sweetalert.js') }}"></script>
+@if($msg = session('warning'))
+<script type="text/javascript">
+  swal("","{!! $msg !!}",'warning');
+</script>
+@endif
 @endsection
-@endsection
+
