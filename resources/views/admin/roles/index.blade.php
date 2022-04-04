@@ -55,7 +55,7 @@
                                         {!! Form::submit('Delete', ['class' => 'btn btn-danger btn-sm']) !!}
                                         {!! Form::close() !!}
                                     @endcan
-                                    @endif
+                                    
                                 </td>
                             </tr>
                         @endforeach

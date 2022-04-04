@@ -52,15 +52,15 @@
                             <td>{{ ++$i }}</td>
                                 <td>{{ $permission->name }}</td>
                                 <td>
-<!--                                     
+                                    
                                     @can('role-edit')
-                                        <a class="btn btn-primary btn-sm" href="{{ route('permissions.edit',$permission->id) }}">Edit</a>
+                                        <!-- <a class="btn btn-primary btn-sm" href="{{ route('permissions.edit',$permission->id) }}">Edit</a> -->
                                     @endcan
                                     @can('role-delete')
-                                        {!! Form::open(['method' => 'DELETE','route' => ['permissions.destroy', $permission->id],'style'=>'display:inline']) !!}
+                                        <!-- {!! Form::open(['method' => 'DELETE','route' => ['permissions.destroy', $permission->id],'style'=>'display:inline']) !!}
                                         {!! Form::submit('Delete', ['class' => 'btn btn-danger btn-sm']) !!}
-                                        {!! Form::close() !!}
-                                    @endcan -->
+                                        {!! Form::close() !!} -->
+                                    @endcan
                                 </td>
                             </tr>
                         @endforeach
