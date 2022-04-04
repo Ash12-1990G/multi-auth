@@ -46,6 +46,7 @@
                                 <td>{{ $role->name }}</td>
                                 <td>
                                     <a class="btn btn-success btn-sm" href="{{ route('roles.show',$role->id) }}">Show</a>
+                                    @if($role->id>1)
                                     @can('role-edit')
                                         <a class="btn btn-primary btn-sm" href="{{ route('roles.edit',$role->id) }}">Edit</a>
                                     @endcan
@@ -54,6 +55,7 @@
                                         {!! Form::submit('Delete', ['class' => 'btn btn-danger btn-sm']) !!}
                                         {!! Form::close() !!}
                                     @endcan
+                                    @endif
                                 </td>
                             </tr>
                         @endforeach

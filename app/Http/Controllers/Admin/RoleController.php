@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
 use DB;
+use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Permission;
 
 class RoleController extends Controller
@@ -69,6 +70,9 @@ class RoleController extends Controller
   
     public function update(Request $request, $id)
     {
+        if(Auth::id()==1){
+            return redirect()->route('roles.index');
+        }
         $this->validate($request, [
             'name' => 'required|unique:roles,name,'.$id,
             'permission' => 'required',
@@ -86,10 +90,14 @@ class RoleController extends Controller
     
     public function destroy($id)
     {
-        Role::find($id)->delete();
+        if(Auth::id()!=1){
+            Role::find($id)->delete();
         
-        return redirect()->route('roles.index')
+            return redirect()->route('roles.index')
             ->with('success', 'Role deleted successfully');
+        }
+        return redirect()->route('roles.index');
+        
     }
 
 }
