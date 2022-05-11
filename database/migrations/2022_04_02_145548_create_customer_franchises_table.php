@@ -20,8 +20,7 @@ class CreateCustomerFranchisesTable extends Migration
             $table->float('amount',8,2);
             $table->float('discount',8,2);
             $table->float('due',8,2);
-            $table->string('payment_type')->default('installment');
-            $table->unsignedInteger('payment_plan')->default('0');
+            $table->string('payment_option')->default('installment');
             $table->string('payment_status');
             $table->date('service_taken');
             $table->date('service_ends');

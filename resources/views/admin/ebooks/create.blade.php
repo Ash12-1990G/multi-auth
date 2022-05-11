@@ -74,6 +74,7 @@
                                     <div class="custom-file">
                                         <input type="file" class="custom-file-input {{ $errors->has('coverpath') ? ' is-invalid' : '' }}" name="coverpath">
                                         <label class="custom-file-label" for="customFile">Choose file</label>
+                                        
                                         @if ($errors->has('coverpath'))
                                         <span class="invalid-feedback" role="alert">
                                             <strong>{{ $errors->first('coverpath') }}.</strong>
@@ -82,7 +83,8 @@
                                     </div>
                                     
                                 </div>
-                            </div>                     
+                            </div> 
+                                              
                         </div>
                         <div class="card-footer">
                             <button type="submit" class="btn btn-primary float-right">Submit</button>
@@ -97,6 +99,7 @@
 @endsection
 @section('scripts')
 <script src="{{ asset('js/eachWordUpper.js') }}"></script>
+
 <script type="text/javascript">
 $(document).ready(function () {
   bsCustomFileInput.init();

@@ -23,12 +23,16 @@
           <div class="card">
               <div class="card-header">
                 <h3 class="card-title">List of Notifications</h3>
-
+                <div class="card-tools">
+                  @can('notification-add')
+                  <a class="btn btn-primary btn-sm"  href="{{ route('notifications.create') }}">New Notification</a>
+                  @endcan
+                </div>
               </div>
               <!-- /.card-header -->
-              <div class="card-body p-0">
+              <div class="card-body">
               <div class="mailbox-controls">
-                <!-- Check all button -->
+                
                 <button type="button" class="btn btn-default btn-sm checkbox-toggle"><i class="far fa-square"></i>
                 </button>
                 <div class="btn-group">
@@ -41,14 +45,14 @@
                 </div>
               </div>
                 <div class="table-responsive mailbox-messages">
-                  <table class="table table-hover table-striped">
+                  <table class="table table-hover table-striped" id="user-datatable">
                     <thead>
                       <tr>
                         <th>#</th>
                         <th>Subject</th>
                         <th>Message</th>
                         <th>Read</th>
-                        <th>Arrive Time</th>
+                        <th>Arrive At</th>
                         <th>
                           Action
                       </th>
@@ -56,55 +60,10 @@
                     </thead>
                     <tbody>
                       
-                      @foreach ($data as $key => $items)
-                              <tr>
-                                  <td>
-                                    <div class="icheck-primary">
-                                      <input type="checkbox" name="read[]" value="{{ $items->id }}" id="check{{ ++$i }}">
-                                      <label for="check{{ ++$i }}"></label>
-                                    </div>
-                                  </td>
-                                  @if($items['type']=='App\Notifications\FailedJobsNotice')
-                                  <td class="mailbox-name">Registration Mail Failure</td>
-                                  @else
-                                  <td class="mailbox-name"></td>
-                                  @endif
-                                  <td class="mailbox-subject"><span class="d-inline-block text-truncate" style="max-width: 450px;">
-                                  {{ $items['data']['message'] }} sjsfsk sfkfjklj sfsfsf sfsfsfsf sfsfsfsfs sfsf
-                                  </span></td>
-                                  <td>@if($items['read_at']!=NULL)
-                                      <i class="fa fa-book-reader text-primary"></i> 
-                                      @else
-                                      <i class="fa fa-book text-danger"></i>
-                                      @endif   
-                                  </td>
-                                  <td class="mailbox-date">{{ $items->created_at->diffForHumans()}}</td>
-                                  <td class="mailbox-name">
-                                      <div class="btn-group">
-                                      
-                                     
-                                      @can('notification-view')
-                                      <a class="btn btn-success btn-sm" href="{{ route('notifications.view',$items->id) }}">Show</a>
-                                      @endcan
-                                      <!-- @can('notification-read')
-                                      {!! Form::open(['method' => 'PATCH','route' => ['notifications.read', $items->id],'style'=>'display:inline']) !!}
-                                          {!! Form::submit('Mark as Read', ['class' => 'btn btn-primary btn-sm mr-2']) !!}
-                                          {!! Form::close() !!}
-                                      @endcan
-                                      
-                                      @can('notification-delete')
-                                          {!! Form::open(['method' => 'DELETE','route' => ['notifications.destroy', $items->id],'style'=>'display:inline']) !!}
-                                          {!! Form::submit('Delete', ['class' => 'btn btn-danger btn-sm']) !!}
-                                          {!! Form::close() !!}
-                                      @endcan -->
-                                      </div>
-                                  </td>
-                              </tr>
-                          @endforeach
+                     
                       
                     </tbody>
                   </table>
-                {{ $data->links() }}
                 </div>
               </div>
               <!-- /.card-body -->
@@ -121,6 +80,54 @@
 @section('scripts')
 <script type="text/javascript" src="{{ asset('js/sweetalert.js') }}"></script>
 <script type="text/javascript" src="{{ asset('js/custom.js') }}"></script>
+<script type="text/javascript" src="{{ asset('plugins/datatables/jquery.dataTables.min.js') }}" ></script>
+<script type="text/javascript" src="{{ asset('plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
+<script type="text/javascript" src="{{ asset('plugins/datatables-responsive/js/dataTables.responsive.min.js') }}"></script>
+<script type="text/javascript" src="{{ asset('plugins/datatables-responsive/js/responsive.bootstrap4.min.js') }}"></script>
+
+
+<script type="text/javascript">
+  $(document).ready(function() {
+  $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+        var table = $('#user-datatable').DataTable({
+            processing: true,
+            serverSide: true,
+            autoWidth: false,
+            ajax:'{!! route('notifications.index') !!}',
+            
+            columns: [
+                {
+                    data: 'DT_RowIndex',
+                    name: 'DT_RowIndex'
+                },
+                {
+                    data: 'subject',
+                    name: 'subject'
+                },
+                {
+                    data: 'message',
+                    name: 'message'
+                },
+                {
+                    data: 'read',
+                    name: 'read'
+                },
+                {
+                    data: 'arrive at',
+                    name: 'arrive at'
+                },
+                {
+                    data: 'action',
+                    name: 'action'
+                },
+            ]
+        });
+  });
+</script>
 @if($msg = session('success'))
 <script type="text/javascript">
   swal("Great job!","{{$msg}}",'success');

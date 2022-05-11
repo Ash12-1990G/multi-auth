@@ -47,17 +47,32 @@ class User extends Authenticatable implements MustVerifyEmail
     ];
     public function students()
     {
-        return $this->hasOne(Student::class,'id');
+        return $this->hasOne(Student::class);
     }
     public function customers()
     {
-        return $this->hasOne(Customer::class,'id');
+        return $this->hasOne(Customer::class);
     }
     //override sendEmailVerificationNotification to send email verification in queue
     public function sendEmailVerificationNotification()
     {
             $this->notify(new \App\Notifications\Auth\QueuedVerifyEmail);
                 
+    }
+    
+    public function scopeSearchCustomer($query, array $filters){
+        
+        $query->when($filters['q'] ?? false,function($query,$search){
+          
+            $query
+            ->where('name', 'LIKE', "%$search%");
+            
+                // ->whereHas('customers', function ($query) use ($search) {
+                //     $query->orWhere('center_code','like','%'.$search.'%');
+                // });
+               
+                
+        });
     }
     
 }

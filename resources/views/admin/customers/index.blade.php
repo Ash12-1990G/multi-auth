@@ -31,53 +31,23 @@
 
               </div>
               <!-- /.card-header -->
-              <div class="card-body p-0">
-              <form class="form-inline ml-3 float-right" method="" action="{{route('customers.index')}}">
+              <div class="card-body">
               
-                  <div class="input-group input-group-sm p-2">
-                    <input class="form-control" name="search" type="search" placeholder="Search" aria-label="Search">
-                   
-                  </div>
-                </form>
-                <table class="table table-striped">
+                <table class="table table-striped" id="user-datatable">
                   <thead>
                     <tr>
-                      <th style="width: 10px">#</th>
-                      <th>Name</th>
+                      <th>#</th>
+                      <th>Institute</th>
+                      <th>Owner</th>
                       <th>Email</th>
                       <th>Phone</th>
-                      <th style="width: 280px">Action</th>
+                      <th>Action</th>
                     </tr>
                   </thead>
                   <tbody>
-                    
-                    @foreach ($data as $key => $user)
-                            <tr>
-                                <td>{{ ++$i }}</td>
-                                <td>{{ $user->users->name }}</td>
-                                <td>{{ $user->users->email }}</td>
-                                <td>{{ $user->phone }} {{ $user->alt_phone }}</td>
-                                <td>
-                                @can('customer-show')
-                                    <a class="btn btn-success btn-sm" href="{{ route('customers.show',$user->id) }}">Show</a>
-                                    @endcan
-                                    @can('customer-edit')
-                                        <a class="btn btn-primary btn-sm" href="{{ route('customers.edit',$user->id) }}">Edit</a>
-                                    @endcan
-                                    @can('customer-delete')
-                                        {!! Form::open(['method' => 'DELETE','route' => ['customers.destroy', $user->id],'style'=>'display:inline']) !!}
-                                        {!! Form::submit('Delete', ['class' => 'btn btn-danger btn-sm']) !!}
-                                        {!! Form::close() !!}
-                                    @endcan
-                                </td>
-                            </tr>
-                        @endforeach
-                    @if($data->count()==0)
-                    <tr><caption class="text-center">No results</caption></tr>
-                    @endif
+                  
                   </tbody>
                 </table>
-                {{ $data->links() }}
               </div>
               <!-- /.card-body -->
             </div>
@@ -92,6 +62,54 @@
 @endsection
 @section('scripts')
 <script type="text/javascript" src="{{ asset('js/sweetalert.js') }}"></script>
+<script type="text/javascript" src="{{ asset('plugins/datatables/jquery.dataTables.min.js') }}" ></script>
+<script type="text/javascript" src="{{ asset('plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
+<script type="text/javascript" src="{{ asset('plugins/datatables-responsive/js/dataTables.responsive.min.js') }}"></script>
+<script type="text/javascript" src="{{ asset('plugins/datatables-responsive/js/responsive.bootstrap4.min.js') }}"></script>
+
+
+<script type="text/javascript">
+  $(document).ready(function() {
+  $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+        var table = $('#user-datatable').DataTable({
+            processing: true,
+            serverSide: true,
+            autoWidth: false,
+            ajax:'{!! route('customers.index') !!}',
+            
+            columns: [
+                {
+                    data: 'DT_RowIndex',
+                    name: 'DT_RowIndex'
+                },
+                {
+                    data: 'institute',
+                    name: 'institute'
+                },
+                {
+                    data: 'owner',
+                    name: 'owner'
+                },
+                {
+                    data: 'email',
+                    name: 'email'
+                },
+                {
+                    data: 'phone',
+                    name: 'phone'
+                },
+                {
+                    data: 'action',
+                    name: 'action'
+                },
+            ]
+        });
+  });
+</script>
 @if($msg = session('success'))
 <script type="text/javascript">
   swal("Great job!","{{$msg}}",'success');

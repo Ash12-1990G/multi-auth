@@ -6,14 +6,53 @@ use App\Http\Controllers\Controller;
 use App\Models\Franchise;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use DB;
+use Yajra\DataTables\Facades\DataTables;
 
 class FranchiseController extends Controller
 {
     public function index(Request $request){
-        $data = Franchise::search(request(['search']))->orderBy('id','DESC')->paginate(5);
-      //dd($data);
-        return view('admin.franchise.index',compact('data'))
-        ->with('i', ($request->input('page', 1) - 1) * 5);
+        if(request()->ajax()){
+            return self::getFranchise();
+        }
+        return view('admin.franchise.index');
+    }
+    public function getFranchise(){
+        $data = Franchise::orderBy('id','ASC')->get();
+        
+        $user = auth()->user();
+        return DataTables::of($data)
+        ->addIndexColumn()
+        ->editColumn('franchise', function($row){
+            return '<span class="text-primary">'.$row->name.' </span> <br><span class="text-muted">'.$row->subname.'</span>';
+        })
+        ->editColumn('duration', function($row){
+            return '<span class="text-danger font-weight-bold">'.$row->service_period.' '.$row->service_interval.'</span>';
+        })
+        ->editColumn('cost', function($row){
+            return '<span class="text-success font-weight-bold"><i class="fas fa-rupee-sign"></i> '.$row->cost.'</span>';
+        })
+        ->editColumn('discount(in %)', function($row){
+            return '<span class="text-danger font-weight-bold"> '.$row->cost.'</span>';
+        })
+        ->addColumn('action', function($row) use ($user){
+            $btn = '';
+                if ($user->can('franchise-show')) {
+                    $btn .= '<a class="btn btn-success btn-sm" href="'.route('franchises.show',$row->id).'">Show</a> ';
+                } 
+                if ($user->can('franchise-edit')) {
+                    $btn .= '<a class="btn btn-primary btn-sm" href="'.route('franchises.edit',$row->id).'"><i class="fas fa-pencil-alt"></i></a> ';
+                } 
+                if ($user->can('franchise-delete')) {
+                    $btn .= \Form::open(['method' => 'DELETE','route' => ['franchises.destroy', $row->id],'style'=>'display:inline']) .
+                    \Form::button('<i class="fas fa-trash"></i>', ['type' => 'submit','class'=>'btn btn-danger btn-sm']).
+                    \Form::close();
+                    
+                } 
+            return $btn;
+        })
+        ->rawColumns(['franchise','duration','cost','discount(in %)','action'])
+        ->make(true);
     }
     public function create(){
         return view('admin.franchise.create');
@@ -21,7 +60,7 @@ class FranchiseController extends Controller
     public function store(Request $request){
         $this->validate($request, [
             'name' => 'required',
-            'subname'=> 'required|unique:courses,code',
+            'subname'=> 'required',
             'details' => 'required',
             'cost' => 'required|regex:/^\d+(\.\d{1,2})?$/',
             'discount' => 'nullable|regex:/^\d+(\.\d{1,2})?$/|min:1|digits_between: 1,99',
@@ -44,16 +83,19 @@ class FranchiseController extends Controller
             $input['image'] = $fileNameToStore;
         }
         
-
-        Franchise::create($input);
+        $input['franchise_code'] = '';
+        $added_franchise = Franchise::create($input);
+        $unique_code['franchise_code'] =  'FCH'.date('Y'). str_pad($added_franchise->id, 5, '0', STR_PAD_LEFT);
+        $added_franchise->save($unique_code);
         return redirect()->route('franchises.index')
                         ->with('success','Franchise created successfully');
         
     }
     public function show($id){
         $franchise = Franchise::findOrFail($id);
-        //dd($user->user->phone);
-        return view('admin.franchise.show',compact('franchise'));
+        $course = $franchise->courses()->select('name','price','description')->limit(5)->get();
+        //dd($course);
+        return view('admin.franchise.show',compact('franchise','course'));
     }
     public function edit($id){
         $franchise = Franchise::findOrFail($id);

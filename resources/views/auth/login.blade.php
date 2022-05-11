@@ -1,16 +1,21 @@
-@extends('frontend.layouts.frontend')
+@extends('frontend.layouts.auth')
 @section('title')
-  Franchise
+  ACTI Admin Login
 @endsection
 
 @section('content')
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-4 pt-5">
-            <div class="card">
+            <div class="card p-2">
                 <div class="card-body">
-                <p class="login-box-msg">Sign in</p>
-                    <form method="POST" action="{{ route('login') }}">
+                <div class="text-center">
+                  
+                      <i class="fas fa-user-circle text-info" style="font-size:45px;"></i>
+                 
+                </div>
+                  <p class="login-box-msg fs-4">Sign in</p>
+                    <form method="POST" action="{{ route('admin.loginsubmit') }}">
                         @csrf
                         <div class="input-group mb-3">
                             <input type="email" class="form-control  @error('email') is-invalid @enderror" placeholder="{{ __('Email Address') }}" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus>
@@ -64,9 +69,7 @@
                             <!-- /.col -->
                         </div>
                     </form>
-                    <p class="mb-0">
-                        <a href="{{ route('register') }}" class="text-center">Register a new membership</a>
-                    </p>
+                   
                 </div>
             </div>
         </div>

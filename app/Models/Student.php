@@ -16,6 +16,10 @@ class Student extends Model
         'gender',
         'alt_phone',
         'father_name',
+        'mother_name',
+        'education',
+        'id_type',
+        'id_number',
         'image',
         'address1',
         'city1',
@@ -27,7 +31,7 @@ class Student extends Model
         'pincode2',
         'status',
     ];
-    protected $dates = ['birth'];
+    protected $dates = ['birth','admission'];
     public function users()
     {
         return $this->belongsTo(User::class,'user_id');
@@ -43,5 +47,6 @@ class Student extends Model
                 });
         });
     }
+    
     
 }

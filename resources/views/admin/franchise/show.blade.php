@@ -18,7 +18,7 @@
 <div class="content">
     <div class="container-fluid">
         <div class="row">
-            <div class="col-lg-12">
+            <div class="col-md-8">
                 @if (\Session::has('success'))
                 <div class="alert alert-success">
                     <p>{{ \Session::get('success') }}</p>
@@ -31,29 +31,72 @@
                         </h4>
                     </div>
                     <div class="card-body">
-                    <div class="post">
-                      <div class="user-block">
-                        <span class="mailbox-attachment-icon has-img">
-                            <img class="w-25 img-fluid" src="{{asset('storage/franchise/'.$franchise->image)}}">
-                        </span>
-                        <div class="username mb-2" style="margin-left:26%;">
-                            <p class="text-primary mb-0" style="font-size:30px; line-height:30px;">{{ $franchise->name }}</p>
-                            <span class="text-muted" style="font-size:20px;">{{ $franchise->subname }}</span>
-                            
+                        <div class="post">
+                            <div class="user-block">
+                                <span class="mailbox-attachment-icon has-img">
+                                    <img class="w-25 img-fluid" src="{{asset('storage/franchise/'.$franchise->image)}}">
+                                </span>
+                                <div class="username mb-2" style="margin-left:26%;">
+                                    <p class="text-primary mb-0" style="font-size:30px; line-height:30px;">{{ $franchise->name }}</p>
+                                    <span class="text-muted" style="font-size:20px;">{{ $franchise->subname }}</span>
+                                    
+                                </div>
+                                <div class="description text-success text-md mr-2 mb-2" style="margin-left:26%;"> 
+                                    <h5 class="mb-0"><i class="fas fa-rupee-sign"></i> {{ $franchise->cost }} @if($franchise->discount!==0)
+                                    <span class="badge badge-pill badge-danger">{{ $franchise->discount }} % discount</span></h5>
+                                
+                                    <span class="text-muted"><strong>Prolongation: </strong> {{ $franchise->service_period }} {{ $franchise->service_interval }}</span>
+                                @endif</div>
+                            </div>
                         </div>
-                        <div class="description text-success text-md mr-2 mb-2" style="margin-left:26%;"> 
-                            <h5 class="mb-0"><i class="fas fa-rupee-sign"></i> {{ $franchise->cost }} @if($franchise->discount!==0)
-                            <span class="badge badge-pill badge-danger">{{ $franchise->discount }} % discount</span></h5>
                         
-                            <span class="text-muted"><strong>Prolongation: </strong> {{ $franchise->service_period }} {{ $franchise->service_interval }}</span>
-                        @endif</div>
-                      </div>
-                      <!-- /.user-block -->
-                      
-                    </div>
                         
                         {!! $franchise->details !!}
+                        
                     </div>
+                    
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Available Courses</h3>
+
+                        <!-- <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <button type="button" class="btn btn-tool" data-card-widget="remove">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        </div> -->
+                    </div>
+                <!-- /.card-header -->
+                    <div class="card-body p-0">
+                        <ul class="products-list product-list-in-card pl-2 pr-2">
+                        @foreach($course as $item)
+                            <li class="item">
+                                <div class="product-img">
+                                    <!-- <img src="dist/img/default-150x150.png" alt="Product Image" class="img-size-50"> -->
+                                </div>
+                                <div class="product-info m-0 pl-2 pr-2">
+                                    <a href="{{ route('courses.index') }}" class="product-title">{{ $item->name }}
+                                        <span class="badge badge-warning float-right"><i class="fas fa-rupee-sign"></i> {{ $item->price }}</span>
+                                    </a>
+                                    <span class="product-description text-truncate">
+                                    {{ $item->description }}
+                                    </span>
+                                </div>
+                            </li>
+                            @endforeach
+                        </ul>
+                        
+                    </div>
+                <!-- /.card-body -->
+                    <div class="card-footer text-center">
+                    <a href="{{ route('courses.index') }}" class="uppercase">View All</a>
+                    </div>
+                <!-- /.card-footer -->
                 </div>
             </div>
         </div>

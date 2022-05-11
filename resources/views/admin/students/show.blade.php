@@ -32,12 +32,19 @@
                         <p class="text-muted text-center">{{ $student->users->email }}</p>
 
                         <ul class="list-group list-group-unbordered mb-3">
-                            <li class="list-group-item">
+                            <li class="list-group-item p-1">
+                                <b>Gender</b> <a class="float-right text-capitalize">{{ $student->gender}}</a>
+                            </li>
+                            <li class="list-group-item p-1">
                                 <b>DOB</b> <a class="float-right">{{ $student->birth->format('F j, Y')}}</a>
                             </li>
-                            <li class="list-group-item">
-                                <b>Contact</b> <a class="float-right">{{ $student->phone}} @if($student->phone!==NULL)<br> {{ $student->phone}} @endif</a>
+                            <li class="list-group-item p-1">
+                                <b>Contact</b> <a class="float-right">{{ $student->phone}} @if($student->alt_phone!==NULL)<br> {{ $student->alt_phone}} @endif</a>
                             </li>
+                            <li class="list-group-item p-1">
+                                <b>Admission</b> <a class="float-right">{{ Carbon\Carbon::parse($student->admission)->format('F j, Y')}}</a>
+                            </li>
+                            
                             
                         </ul>
                         
@@ -52,20 +59,26 @@
                     </div>
                     <!-- /.card-header -->
                     <div class="card-body">
+                        <strong><i class="fas fa-book mr-1"></i> Education Qualification</strong>
+                        <p class="text-muted mb-1">{{ $student->education }}</p>
+                        <hr class="m-1">
                         <strong><i class="fas fa-user mr-1"></i> Father's Name</strong>
-                        <p class="text-muted">{{ $student->father_name}}</p>
-                        <hr>
+                        <p class="text-muted mb-1">{{ $student->father_name}}</p>
+                        <hr class="m-1">
+                        <strong><i class="fas fa-user mr-1"></i> Mother's Name</strong>
+                        <p class="text-muted mb-1">{{ $student->mother_name}}</p>
+                        <hr class="m-1">
                         <strong><i class="fas fa-map-marker-alt mr-1"></i> Present Address</strong>
                                                       
-                        <p class="text-muted">{{ $student->address1}}
+                        <p class="text-muted mb-1">{{ $student->address1}}
                             {{ $student->city1}}
                             {{ $student->state1}}
                             {{ $student->pincode1}}</p>
-                            <hr>
+                        <hr class="m-1">
                         @if($student->address2!==NULL)
                         <strong><i class="fas fa-map-marker-alt mr-1"></i> permanent Address</strong>
                                                       
-                        <p class="text-muted">{{ $student->address2}}
+                        <p class="text-muted mb-1">{{ $student->address2}}
                             {{ $student->city2}}
                             {{ $student->state2}}
                             {{ $student->pincode2}}</p>

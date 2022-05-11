@@ -29,40 +29,22 @@
 
               </div>
               <!-- /.card-header -->
-              <div class="card-body p-0">
-                <table class="table table-striped">
+              <div class="card-body">
+                <table class="table table-bordered" id="user-datatable">
                   <thead>
                     <tr>
-                      <th style="width: 10px">#</th>
+                      <th>#</th>
                       <th>Name</th>
-                      <th style="width: 280px">Action</th>
+                      <th>Action</th>
                     </tr>
                   </thead>
                   <tbody>
                     
-                    @foreach ($roles as $key => $role)
-                            <tr>
-                                <td>{{ ++$i}}</td>
-                                <td>{{ $role->name }}</td>
-                                <td>
-                                    <a class="btn btn-success btn-sm" href="{{ route('roles.show',$role->id) }}">Show</a>
-                                    @if($role->name !== 'super-admin' || $role->name !== 'Franchise-Admin' || $role->name !== 'Student-Admin')
-                                    @can('role-edit')
-                                        <a class="btn btn-primary btn-sm" href="{{ route('roles.edit',$role->id) }}">Edit</a>
-                                    @endcan
-                                    @can('role-delete')
-                                        {!! Form::open(['method' => 'DELETE','route' => ['roles.destroy', $role->id],'style'=>'display:inline']) !!}
-                                        {!! Form::submit('Delete', ['class' => 'btn btn-danger btn-sm']) !!}
-                                        {!! Form::close() !!}
-                                    @endcan
-                                    @endif
-                                </td>
-                            </tr>
-                        @endforeach
+                    
                     
                   </tbody>
                 </table>
-                {{ $roles->links() }}
+               
               </div>
               <!-- /.card-body -->
             </div>
@@ -77,6 +59,42 @@
 @endsection
 @section('scripts')
 <script type="text/javascript" src="{{ asset('js/sweetalert.js') }}"></script>
+<script type="text/javascript" src="{{ asset('plugins/datatables/jquery.dataTables.min.js') }}" ></script>
+<script type="text/javascript" src="{{ asset('plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
+<script type="text/javascript" src="{{ asset('plugins/datatables-responsive/js/dataTables.responsive.min.js') }}"></script>
+<script type="text/javascript" src="{{ asset('plugins/datatables-responsive/js/responsive.bootstrap4.min.js') }}"></script>
+
+
+<script type="text/javascript">
+  $(document).ready(function() {
+  $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+        var table = $('#user-datatable').DataTable({
+            processing: true,
+            serverSide: true,
+            autoWidth: false,
+            ajax:'{!! route('roles.index') !!}',
+            
+            columns: [
+                {
+                    data: 'DT_RowIndex',
+                    name: 'DT_RowIndex'
+                },
+                {
+                    data: 'name',
+                    name: 'name'
+                },
+                {
+                    data: 'action',
+                    name: 'action'
+                },
+            ]
+        });
+              });
+</script>
 @if($msg = session('success'))
 <script type="text/javascript">
   swal("Great job!","{{$msg}}",'success');

@@ -31,8 +31,8 @@
                 </div>
               </div>
               <!-- /.card-header -->
-              <div class="card-body p-0">
-                <table class="table">
+              <div class="card-body">
+                <table class="table table-bordered" id="user-datatable">
                   <thead>
                     <tr>
                       <th style="width: 10px">#</th>
@@ -43,36 +43,8 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
-                    @foreach ($data as $key => $user)
-                            <tr>
-                                <td>{{ ++$i }}</td>
-                                <td>{{ $user->name }}</td>
-                                <td>{{ $user->email }}</td>
-                                <td>
-                                    @if(!empty($user->getRoleNames()))
-                                        @foreach($user->getRoleNames() as $val)
-                                            <label class="badge badge-dark">{{ $val }}</label>
-                                        @endforeach
-                                    @endif
-                                </td>
-                                <td>
-                                    <!-- <a class="btn btn-success btn-sm" href="{{ route('users.show',$user->id) }}">Show</a> -->
-                                    @can('user-edit')
-                                        <a class="btn btn-primary btn-sm" href="{{ route('users.edit',$user->id) }}">Edit</a>
-                                    @endcan
-                                    @can('user-delete')
-                                        {!! Form::open(['method' => 'DELETE','route' => ['users.destroy', $user->id],'style'=>'display:inline']) !!}
-                                        {!! Form::submit('Delete', ['class' => 'btn btn-danger btn-sm']) !!}
-                                        {!! Form::close() !!}
-                                    @endcan
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tr>
                   </tbody>
                 </table>
-                {{ $data->render() }}
               </div>
               <!-- /.card-body -->
             </div>
@@ -87,6 +59,50 @@
 @endsection
 @section('scripts')
 <script type="text/javascript" src="{{ asset('js/sweetalert.js') }}"></script>
+<script type="text/javascript" src="{{ asset('plugins/datatables/jquery.dataTables.min.js') }}" ></script>
+<script type="text/javascript" src="{{ asset('plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
+<script type="text/javascript" src="{{ asset('plugins/datatables-responsive/js/dataTables.responsive.min.js') }}"></script>
+<script type="text/javascript" src="{{ asset('plugins/datatables-responsive/js/responsive.bootstrap4.min.js') }}"></script>
+
+
+<script type="text/javascript">
+  $(document).ready(function() {
+  $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+        var table = $('#user-datatable').DataTable({
+            processing: true,
+            serverSide: true,
+            autoWidth: false,
+            ajax:'{!! route('users.index') !!}',
+            
+            columns: [
+                {
+                    data: 'DT_RowIndex',
+                    name: 'DT_RowIndex'
+                },
+                {
+                    data: 'name',
+                    name: 'name'
+                },
+                {
+                    data: 'email',
+                    name: 'email'
+                },
+                {
+                    data: 'roles',
+                    name: 'roles'
+                },
+                {
+                    data: 'action',
+                    name: 'action'
+                },
+            ]
+        });
+  });
+</script>
 @if($msg = session('success'))
 <script type="text/javascript">
   swal("Great job!","{{$msg}}",'success');

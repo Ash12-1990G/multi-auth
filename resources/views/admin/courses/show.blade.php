@@ -29,26 +29,33 @@
                         <h3 class="card-title">Course Informations</h3>
                     </div>
                     <div class="card-body">
-                        <dl class="row">
-                            <dt class="col-sm-4">Name</dt>
-                            <dd class="col-sm-8">{{ $course->name }}</dd>
-                            <dt class="col-sm-4">Code</dt>
-                            <dd class="col-sm-8">
-                            {{ $course->code }}
-                            </dd>
-                            <dt class="col-sm-4">Slug</dt>
-                            <dd class="col-sm-8">
-                            {{ $course->slug }}
-                            </dd>
-                            <dt class="col-sm-4">Price</dt>
-                            <dd class="col-sm-8">
-                            Rs {{ $course->price }}
-                            </dd>
-                            <dt class="col-sm-4">Description</dt>
-                            <dd class="col-sm-8">
-                            {{ $course->description }}
-                            </dd>
-                        </dl>
+                        <div class="post">
+                            <div class="user-block">
+                                <!-- <img class="img-circle img-bordered-sm" src="../../dist/img/user7-128x128.jpg" alt="User Image"> -->
+                                <div class="username ml-0">
+                                    <h4 class="text-primary">
+                                        {{ $course->name }}
+                                    </h4>
+                                    <h6> Course Fee <span class="badge badge-pill badge-danger"><i class="fas fa-rupee-sign"></i> {{ $course->price }}</span></h6>
+                                </div>
+                                
+                            </div>
+                            <!-- /.user-block -->
+                            <div class="description">
+                                <h6 class="text-grey font-weight-bold">Description</h6>
+                                <p>
+                                {{ $course->description }}
+                                </p>
+                            </div>
+                            <div class="syllabus">
+                                <h6 class="text-grey font-weight-bold">Syllabus</h6>
+                                <p>
+                                {!! $course->syllabus->description !!}
+                                </p>
+                            </div>
+                            
+                        </div>
+                        
                     </div>
                 </div>
             </div>

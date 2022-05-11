@@ -22,7 +22,7 @@
               
                 <div class="card card-primary card-outline">
                     <div class="card-header">
-                        <h3 class="card-title">Read Notifation 
+                        <h3 class="card-title">Read Notification 
                             <div class="card-tools">
                            
                         </h3>

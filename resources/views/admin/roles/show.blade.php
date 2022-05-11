@@ -37,7 +37,7 @@
                             <dd class="col-sm-8">
                                 @if(!empty($rolePermissions))
                                 @foreach($rolePermissions as $permission)
-                                    <label class="badge badge-success">{{ $permission->name }}</label>
+                                    <label class="badge badge-secondary font-weight-normal p-1" style="font-size:13px;">{{ $permission->name }}</label>
                                 @endforeach
                                 @endif
                             </dd>

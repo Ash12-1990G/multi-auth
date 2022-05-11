@@ -10,6 +10,8 @@ class Customer extends Model
     use HasFactory;
     protected $fillable = [
         'user_id',
+        'center_code',
+        'cust_name',
         'phone',
         'alt_phone',
         'address',
@@ -20,6 +22,7 @@ class Customer extends Model
         'latitude',
         'longitude',
     ];
+
     public function users()
     {
         return $this->belongsTo(User::class,'user_id');

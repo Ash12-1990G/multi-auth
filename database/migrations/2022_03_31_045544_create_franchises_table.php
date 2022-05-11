@@ -16,6 +16,7 @@ class CreateFranchisesTable extends Migration
         Schema::create('franchises', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('franchise_code');
             $table->string('subname');
             $table->LongText('details');
             $table->float('cost', 8, 2);

@@ -8,19 +8,53 @@ use App\Models\User;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
 use App\Jobs\SendEmailJob;
+use Yajra\DataTables\Facades\DataTables;
 
 class UserController extends Controller
 {
     public function index(Request $request)
     {
-        // $data = User::with(['roles'=>function($q){
-        //     $q->whereNotIn('name',['Student-admin','Franchise-Admin']);
-        // }])->orderBy('id','DESC')->paginate(5);
+                
+        if(request()->ajax()){
+            return self::getUsers();
+        }
+        return view('admin.users.index');
+    }
+    public function getUsers(){
         $data = User::whereHas('roles',function($q){
             $q->whereNotIn('name',['Super-Admin','Student-admin','Franchise-Admin']);
-        })->orderBy('id','DESC')->paginate(5);
-        //dd($data);
-        return view('admin.users.index',compact('data'))->with('i', ($request->input('page', 1) - 1) * 5);
+        })->orderBy('id','DESC')->get();
+        
+        $user = auth()->user();
+        return DataTables::of($data)
+        ->addIndexColumn()
+        ->editColumn('roles', function($row){
+            $btn = '';
+            if(!empty($row->getRoleNames())){
+                foreach($row->getRoleNames() as $val){
+                    $btn .= '<h4 class="badge badge-dark font-weight-normal">'.$val.'</h4>';
+                }
+            }
+            return $btn;
+        })
+        ->addColumn('action', function($row) use ($user){
+            $btn = '';
+                // if ($user->can('role-show')) {
+                //     $btn .= '<a class="btn btn-success btn-sm" href="'.route('roles.show',$role->id).'">Show</a> ';
+                // } 
+                if ($user->can('user-edit')) {
+                    $btn .= '<a class="btn btn-primary btn-sm" href="'.route('users.edit',$row->id).'"><i class="fas fa-pencil-alt"></i></a> ';
+                } 
+                if ($user->can('user-delete')) {
+                    $btn .= \Form::open(['method' => 'DELETE','route' => ['users.destroy', $row->id],'style'=>'display:inline']) .
+                    \Form::button('<i class="fas fa-trash"></i>', ['type' => 'submit','class'=>'btn btn-danger btn-sm']).
+                    \Form::close();
+                    
+                } 
+            return $btn;
+        })
+        ->rawColumns(['roles','action'])
+        ->make(true);
     }
     public function create()
     {
@@ -84,12 +118,13 @@ class UserController extends Controller
         return redirect()->route('users.index')
                         ->with('success','User updated successfully');
     }
+    
     public function destroy($id)
     {
 
         $user = User::findOrFail($id);
-        $roles = $user->getRoleNames();
-        $user->removeRole($roles);
+        // $roles = $user->getRoleNames();
+        // $user->removeRole($roles);
         $user->delete();
 
 

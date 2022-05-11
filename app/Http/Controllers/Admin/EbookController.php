@@ -5,17 +5,54 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Course;
 use App\Models\Ebook;
+use App\Modules\Course\Ebooks\EbookService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
+use Yajra\DataTables\Facades\DataTables;
+
 
 class EbookController extends Controller
 {
     public function index(Request $request,$course_id){
-        $ebook =  Ebook::where('course_id',$course_id)->paginate(5);
+        // $ebook =  Ebook::where('course_id',$course_id)->paginate(5);
         $course =  Course::find($course_id);
         //dd($course);
-        return view('admin.ebooks.index',compact('ebook','course'))
-        ->with('i', ($request->input('page', 1) - 1) * 5);
+        if(request()->ajax()){
+            return self::getDatatable($course_id);
+        };
+        return view('admin.ebooks.index',compact('course'));
+    }
+    public function getDatatable($course_id){
+        $data = Ebook::where('course_id',$course_id)->get();
+        $user = auth()->user();
+        return DataTables::of($data)
+        ->addIndexColumn()
+        ->editColumn('title', function($row) {
+            return '<p class="text-primary" > '.$row->title.'</p>';
+        })
+        ->editColumn('author', function($row) {
+            return $row->author;
+        })
+        ->editColumn('book cover', function($row) {
+            return '<img class="img-fluid" width="80" height="50" src="'.asset('storage/ebooks/'.$row->coverpath).'">';
+        })
+        ->addColumn('action', function($row) use ($user){
+            $btn = '';
+            $btn .= '<a class="btn btn-dark btn-sm" href="'.route('ebooks.download',$row->bookpath).'"><i class="fas fa-download"></i></a> ';
+                if ($user->can('ebook-edit')) {
+                    $btn .= '<a class="btn btn-primary btn-sm" href="'.route('ebooks.edit',$row->id).'"><i class="fas fa-pencil-alt"></i></a> ';
+                } 
+                if ($user->can('ebook-delete')) {
+                    $btn .= \Form::open(['method' => 'DELETE','route' => ['ebooks.destroy', $row->id],'style'=>'display:inline']) .
+                    \Form::button('<i class="fas fa-trash"></i>', ['type' => 'submit','class'=>'btn btn-danger btn-sm']).
+                    \Form::close();
+                    
+                } 
+            return $btn;
+        })
+        ->rawColumns(['title','author','book cover','action'])
+        ->make(true);
     }
     public function create($course_id){
         $course = Course::find($course_id);
@@ -30,6 +67,8 @@ class EbookController extends Controller
             'bookpath'=> 'required|file|mimes:pdf',
             'coverpath' => 'required|image|mimes:jpeg,png,jpg|max:2048',
         ]);
+        
+        
         //upload book
         $filenameWithExt = $request->file('bookpath')->getClientOriginalName ();
         // Get Filename
@@ -39,7 +78,7 @@ class EbookController extends Controller
         // Filename To store
         $fileNameToStore = $filename. '_'. time().'.'.$extension;
         // Upload Image
-        $path = $request->file('bookpath')->storeAs('public/ebooks', $fileNameToStore);
+        $path = $request->file('bookpath')->storeAs('ebooks', $fileNameToStore);
         
         // upload cover
         $filecover = $request->file('coverpath')->getClientOriginalName ();
@@ -76,11 +115,27 @@ class EbookController extends Controller
                         ->with('success','Book updated successfully');
 
     }
+    public function download($pdf)
+    {
+        
+        $book = new EbookService();
+        return $book->ebookDownload($pdf);
+       
+        
+    }
     public function destroy($id){
         $book = Ebook::findOrFail($id);
+        $course = $book->course_id;
+        $bookpath = storage_path('app/ebooks/' . $book->bookpath);
+
+        if(File::exists($bookpath)){
+            File::delete($bookpath);
+        }
+        if(Storage::exists('public/ebooks/' . $book->coverpath)){
+            Storage::delete('public/ebooks/' . $book->coverpath);
+        }
         $book->delete();
-        Storage::delete(['ebooks/'.$book->bookpath, 'ebooks/'.$book->coverpath]);
-        return redirect()->route('ebooks.index',$book->course_id)
+        return redirect()->route('ebooks.index',$course)
                         ->with('success','User deleted successfully');
     }
 }

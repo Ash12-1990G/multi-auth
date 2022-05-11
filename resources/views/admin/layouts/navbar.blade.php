@@ -17,18 +17,29 @@
           <i class="far fa-user-circle"></i> {{ Auth::user()->name }}
         </a>
         <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-            <a href="#" class="dropdown-item">
-              <i class="fas fa- mr-2"></i> Profile
+          @if(auth()->user()->hasRole('Student-Admin'))
+            <a href="{{ route('student.profile') }}" class="dropdown-item">
+              <!-- <i class="fas fa- mr-2"></i> Profile -->Profile
             </a>
             <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="{{ route('logout') }}" onclick="event.preventDefault();
+            <a class="dropdown-item" href="{{ route('student.logout') }}" onclick="event.preventDefault();
+                                document.getElementById('logout-form1').submit();">
+                {{ __('Logout') }}
+            </a>
+            <form id="logout-form1" action="{{ route('student.logout') }}" method="POST" class="d-none">
+                @csrf
+            </form>
+            @endif
+            @if(auth()->user()->hasRole('super-admin'))
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="{{ route('admin.logout') }}" onclick="event.preventDefault();
                                 document.getElementById('logout-form').submit();">
                 {{ __('Logout') }}
             </a>
-            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+            <form id="logout-form" action="{{ route('admin.logout') }}" method="POST" class="d-none">
                 @csrf
             </form>
-          
+            @endif
          
         </div>
       </li>

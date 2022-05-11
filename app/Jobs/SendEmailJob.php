@@ -32,7 +32,7 @@ class SendEmailJob implements ShouldQueue
     {
         $this->mailData = $mailData;
     }
-
+    
     /**
      * Execute the job.
      *

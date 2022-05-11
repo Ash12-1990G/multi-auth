@@ -10,6 +10,7 @@ class Franchise extends Model
     use HasFactory;
     protected $fillable = [
         'name',
+        'franchise_code',
         'subname',
         'details',
         'cost',
@@ -18,10 +19,16 @@ class Franchise extends Model
         'service_interval',
         'image',
     ];
-    public function scopeSearch($query, array $filters){
-        $query->when($filters['search'] ?? false,function($query,$search){
-            $query
-                ->where('name','like','%'.$search.'%');
-        });
+    // public function scopeSearch($query, array $filters){
+    //     $query->when($filters['q'] ?? false,function($query,$search){
+    //         $query
+    //             ->where('name','like','%'.$search.'%')
+    //             ->orWhere('franchise_code','like','%'.$search.'%');
+
+    //     });
+    // }
+    public function courses()
+    {
+        return $this->hasMany(Course::class);
     }
 }

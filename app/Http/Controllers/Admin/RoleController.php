@@ -8,6 +8,8 @@ use Spatie\Permission\Models\Role;
 use DB;
 use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Permission;
+use Yajra\DataTables\Facades\DataTables;
+
 
 class RoleController extends Controller
 {
@@ -18,17 +20,45 @@ class RoleController extends Controller
          $this->middleware('permission:role-edit', ['only' => ['edit','update']]);
          $this->middleware('permission:role-delete', ['only' => ['destroy']]);
     }
-   
-    public function index(Request $request)
-    {
-        $roles = Role::orderBy('id','DESC')->paginate(5);
-        return view('admin.roles.index',compact('roles'))
-            ->with('i', ($request->input('page', 1) - 1) * 5);
+    public function index()
+    {   
+        
+        if(request()->ajax()){
+            return self::getRoles();
+        }
+            return view('admin.roles.index');
     }
+    public function getRoles(){
+        $roles = Role::orderBy('id','DESC')->withCount('users')->get();
+        $user = Auth::user();
+        return DataTables::of($roles)
+        ->addIndexColumn()
+        ->addColumn('action', function($role) use ($user){
+            $btn = '';
+            if($role->name !== 'super-admin' && $role->name !== 'Franchise-Admin' && $role->name !== 'Student-Admin'){
+                if ($user->can('role-show')) {
+                    $btn .= '<a class="btn btn-success btn-sm" href="'.route('roles.show',$role->id).'">Show</a> ';
+                } 
+                if ($user->can('role-edit')) {
+                    $btn .= '<a class="btn btn-primary btn-sm" href="'.route('roles.edit',$role->id).'"><i class="fas fa-pencil-alt"></i></a> ';
+                } 
+                if ($user->can('role-delete') && $role->users_count==0) {
+                    $btn .= \Form::open(['method' => 'DELETE','route' => ['roles.destroy', $role->id],'style'=>'display:inline']) .
+                    \Form::button('<i class="fas fa-trash"></i>', ['type' => 'submit','class'=>'btn btn-danger btn-sm']).
+                    \Form::close();
+                    
+                } 
+            }
+            return $btn;
+        })
+        ->rawColumns(['action'])
+        ->make(true);
+    }
+    
     
     public function create()
     {
-        $permission = Permission::where('id','>',10)->get();
+        $permission = Permission::where('id','>',10)->orderBy('name')->get();
         return view('admin.roles.create',compact('permission'));
     }
     

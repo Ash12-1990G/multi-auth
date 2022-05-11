@@ -31,7 +31,7 @@
 
               </div>
               <!-- /.card-header -->
-              <div class="card-body p-0">
+              <div class="card-body">
               <!-- <form class="form-inline ml-3 float-right" method="" action="{{route('ebooks.index',$course->id)}}">
               
                   <div class="input-group input-group-sm p-2">
@@ -39,7 +39,7 @@
                    
                   </div>
                 </form> -->
-                <table class="table table-striped">
+                <table class="table table-striped" id="user-datatable">
                   <thead>
                     <tr>
                       <th style="width: 10px">#</th>
@@ -50,35 +50,9 @@
                     </tr>
                   </thead>
                   <tbody>
-                   @if($ebook->count()>0)
-                    @foreach ($ebook as $key => $item)
-                            <tr>
-                                <td>{{ ++$i }}</td>
-                                <td>{{ $item->title }}</td>
-                                <td>{{ $item->author }}</td>
-                                <td><img class="img-fluid" width="80" height="50" src="{{asset('storage/ebooks/'.$item->coverpath)}}"></td>
-                                <td>
-                              
-                                  
-                               
-                                
-                                    @can('ebook-edit')
-                                        <a class="btn btn-primary btn-sm" href="{{ route('ebooks.edit',$item->id) }}">Edit</a>
-                                    @endcan
-                                    @can('ebook-delete')
-                                        {!! Form::open(['method' => 'DELETE','route' => ['ebooks.destroy', $item->id],'style'=>'display:inline']) !!}
-                                        {!! Form::submit('Delete', ['class' => 'btn btn-danger btn-sm']) !!}
-                                        {!! Form::close() !!}
-                                    @endcan
-                                </td>
-                            </tr>
-                        @endforeach
-                    @else
-                    <tr><caption class="text-center">No results</caption></tr>
-                    @endif
+                   
                   </tbody>
                 </table>
-                {{ $ebook->links() }}
               </div>
               <!-- /.card-body -->
             </div>
@@ -93,6 +67,53 @@
 @endsection
 @section('scripts')
 <script type="text/javascript" src="{{ asset('js/sweetalert.js') }}"></script>
+<script type="text/javascript" src="{{ asset('plugins/datatables/jquery.dataTables.min.js') }}" ></script>
+<script type="text/javascript" src="{{ asset('plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
+<script type="text/javascript" src="{{ asset('plugins/datatables-responsive/js/dataTables.responsive.min.js') }}"></script>
+<script type="text/javascript" src="{{ asset('plugins/datatables-responsive/js/responsive.bootstrap4.min.js') }}"></script>
+
+
+<script type="text/javascript">
+  $(document).ready(function() {
+  $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+        var table = $('#user-datatable').DataTable({
+            processing: true,
+            serverSide: true,
+            autoWidth: false,
+            ajax:'{!! route('ebooks.index',$course->id) !!}',
+            columns: [
+                {
+                    data: 'DT_RowIndex',
+                    name: 'DT_RowIndex'
+                },
+                {
+                    data: 'title',
+                    name: 'title',
+                    width: '30%'
+
+                },
+                {
+                    data: 'author',
+                    name: 'author',
+                    width: '20%'
+                },
+                {
+                    data: 'book cover',
+                    name: 'book cover',
+                    width: '20%'
+                },
+                {
+                    data: 'action',
+                    name: 'action'
+                },
+            ]
+        });
+  });
+</script>
 @if($msg = session('success'))
 <script type="text/javascript">
   swal("Great job!","{{$msg}}",'success');

@@ -17,18 +17,19 @@
 </div>
 <div class="content">
     <div class="container-fluid">
+    <form class="g-3" action={{route('customers.update',$customer->id)}} method="post" enctype="multipart/form-data">
+                    @csrf
+                    @method('PATCH')
         <div class="row">
-            <div class="col-lg-12">
-                <div class="card">
+            <div class="col-lg-6">
+                <div class="card card-primary">
                     <div class="card-header">
                         <h3 class="card-title">Edit customer</h3>
                     </div>
-                    <form class="g-3" action={{route('customers.update',$customer->id)}} method="post" enctype="multipart/form-data">
-                    @csrf
-                    @method('PATCH')
+                    
                         <div class="card-body row ">
-                            <div class="form-group col-6">
-                                <label>Name</label>
+                            <div class="form-group col-12">
+                                <label>Institute Name</label>
                                 <input type="text" class="first-upper form-control {{ $errors->has('name') ? ' is-invalid' : '' }}" name="name" value="{{ old('name',$customer->users->name)}}">
                                 @if ($errors->has('name'))
                                 <span class="invalid-feedback" role="alert">
@@ -36,7 +37,16 @@
                                 </span>
                                 @endif
                             </div>
-                            <div class="form-group col-6">
+                            <div class="form-group col-12">
+                                <label class="form-label">Owner/Customer Name</label>
+                                <input type="input" name="cust_name" class="form-control {{ $errors->has('cust_name') ? ' is-invalid' : '' }}"  value="{{old('cust_name',$customer->users->cust_name)}}">
+                                @if ($errors->has('cust_name'))
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $errors->first('cust_name') }}.</strong>
+                                </span>
+                                @endif
+                            </div>
+                            <div class="form-group col-12">
                                 <label class="form-label">Email</label>
                                 <input type="email" name="email" class="form-control {{ $errors->has('email') ? ' is-invalid' : '' }}"  value="{{old('email',$customer->users->email)}}">
                                 @if ($errors->has('email'))
@@ -45,7 +55,7 @@
                                 </span>
                                 @endif
                             </div>
-                            <div class="form-group col-6">
+                            <div class="form-group col-12">
                                 <label for="inputPhone4" class="form-label">Phone</label>
                                 <input type="text" name="phone" class="form-control {{ $errors->has('phone') ? ' is-invalid' : '' }}"  value="{{old('phone',$customer->phone)}}">
                                 @if ($errors->has('phone'))
@@ -54,7 +64,7 @@
                                 </span>
                                 @endif
                             </div>
-                            <div class="form-group col-6">
+                            <div class="form-group col-12">
                                 <label for="inputPhone4" class="form-label">Alt Phone</label>
                                 <input type="text" name="alt_phone" class="form-control {{ $errors->has('alt_phone') ? ' is-invalid' : '' }}"  value="{{old('alt_phone',$customer->alt_phone)}}">
                                 @if ($errors->has('alt_phone'))
@@ -63,7 +73,22 @@
                                 </span>
                                 @endif
                             </div>
-                            <div class="form-group col-12">
+                            
+                            
+                        </div>
+                        
+                    
+                      
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card card-info">
+                    <div class="card-header">
+                        <h3 class="card-title">Location/Postal Address</h3>
+                    </div>
+                    
+                    <div class="card-body row ">
+                    <div class="form-group col-12">
                                 <p class="fw-bold form-sub-heading border-bottom  text-primary">Start-up Location</p>
                                 <label  class="form-label">Location</label>
                                 
@@ -118,16 +143,15 @@
                                 </span>
                                 @endif
                             </div>
-                            
-                        </div>
-                        <div class="card-footer">
-                            <button type="submit" class="btn btn-primary">Submit</button>
-                        </div>
-                    </form>
-                      
+                    </div>
                 </div>
             </div>
+
         </div>
+        <div class="text-center">
+            <button type="submit" class="btn btn-primary mb-2">Submit</button>
+        </div>
+    </form>
     </div>
 </div>
 @endsection

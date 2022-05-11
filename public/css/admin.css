@@ -5,8 +5,21 @@
   height: 100%;
   position: fixed;
   background: #22222269;
+ 
 }
-
+.text-less-dark{
+  color:#636668;
+}
+.overlay-div {
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  display:none;
+  background: #007bff40;
+  z-index:1;
+}
 .overlay__inner {
   left: 0;
   top: 0;
@@ -45,4 +58,10 @@
   color: #1764b1;
   font-weight: 600;
   padding: 10px;
+}
+.book-body{
+  background-color:#f1f1f1;
+}
+.book-post{
+  box-shadow: 0px 1px 6px rgba(0,0,0,.5) !important;
 }

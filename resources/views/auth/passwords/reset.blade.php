@@ -1,9 +1,11 @@
-@extends('layouts.app')
-
+@extends('frontend.layouts.auth')
+@section('title')
+  ACTI Reset Password
+@endsection
 @section('content')
 <div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
+    <div class="row justify-content-center" style="margin-top:30px;">
+        <div class="col-md-8 pt-5">
             <div class="card">
                 <div class="card-header">{{ __('Reset Password') }}</div>
 

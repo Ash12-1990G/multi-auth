@@ -30,15 +30,8 @@
 
               </div>
               <!-- /.card-header -->
-              <div class="card-body p-0">
-              <form class="form-inline ml-3 float-right" method="" action="{{route('franchises.index')}}">
-              
-                  <div class="input-group input-group-sm p-2">
-                    <input class="form-control" name="search" type="search" placeholder="Search" aria-label="Search">
-                   
-                  </div>
-                </form>
-                <table class="table table-striped">
+              <div class="card-body ">
+                <table class="table table-striped" id="user-datatable">
                   <thead>
                     <tr>
                       <th style="width: 10px">#</th>
@@ -50,43 +43,9 @@
                     </tr>
                   </thead>
                   <tbody>
-                  @if($data->count()>0) 
-                    @foreach ($data as $key => $item)
-                            <tr>
-                                <td>{{ ++$i }}</td>
-                                <td><span class="text-primary">{{ $item->name }}</span><br>
-                                <span class="text-muted">{{ $item->subname }}</span></td>
-                                <td>
-                                <span class="text-danger font-weight-bold">{{ $item->service_period }} {{ $item->service_interval }}</span>
-                                </td>
-                                <td><span class="text-success font-weight-bold"><i class="fas fa-rupee-sign"></i> {{ $item->cost }}</span></td>
-                                <td><span class="text-danger font-weight-bold">@if($item->discount!=0){{ $item->discount }}
-                                  @endif </span>
-                                </td>
-                                <td>
-                              
-                                  
-                               
-                                @can('franchise-show')
-                                    <a class="btn btn-success btn-sm" href="{{ route('franchises.show',$item->id) }}">Show</a>
-                                    @endcan
-                                    @can('franchise-edit')
-                                        <a class="btn btn-primary btn-sm" href="{{ route('franchises.edit',$item->id) }}">Edit</a>
-                                    @endcan
-                                    @can('franchise-delete')
-                                        {!! Form::open(['method' => 'DELETE','route' => ['franchises.destroy', $item->id],'style'=>'display:inline']) !!}
-                                        {!! Form::submit('Delete', ['class' => 'btn btn-danger btn-sm']) !!}
-                                        {!! Form::close() !!}
-                                    @endcan
-                                </td>
-                            </tr>
-                        @endforeach
-                      @else
-                    <tr><caption class="text-center">No results</caption></tr>
-                    @endif
+                  
                   </tbody>
                 </table>
-                {{ $data->links() }}
               </div>
               <!-- /.card-body -->
             </div>
@@ -101,6 +60,57 @@
 @endsection
 @section('scripts')
 <script type="text/javascript" src="{{ asset('js/sweetalert.js') }}"></script>
+<script type="text/javascript" src="{{ asset('plugins/datatables/jquery.dataTables.min.js') }}" ></script>
+<script type="text/javascript" src="{{ asset('plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
+<script type="text/javascript" src="{{ asset('plugins/datatables-responsive/js/dataTables.responsive.min.js') }}"></script>
+<script type="text/javascript" src="{{ asset('plugins/datatables-responsive/js/responsive.bootstrap4.min.js') }}"></script>
+
+
+<script type="text/javascript">
+  $(document).ready(function() {
+  $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+        var table = $('#user-datatable').DataTable({
+            processing: true,
+            serverSide: true,
+            autoWidth: false,
+            ajax:'{!! route('franchises.index') !!}',
+            
+            columns: [
+                {
+                    data: 'DT_RowIndex',
+                    name: 'DT_RowIndex'
+                },
+                {
+                    data: 'franchise',
+                    name: 'franchise',
+                    width: '30%'
+                },
+                {
+                    data: 'duration',
+                    name: 'duration'
+                },
+                {
+                    data: 'cost',
+                    name: 'cost',
+                    width: '10%'
+                },
+                {
+                    data: 'discount(in %)',
+                    name: 'discount(in %)',
+                    width: '20%'
+                },
+                {
+                    data: 'action',
+                    name: 'action'
+                },
+            ]
+        });
+  });
+</script>
 @if($msg = session('success'))
 <script type="text/javascript">
   swal("Great job!","{{$msg}}",'success');

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
+use Yajra\DataTables\Facades\DataTables;
 
 class PermissionsController extends Controller
 {
@@ -19,10 +20,15 @@ class PermissionsController extends Controller
     
     public function index(Request $request)
     {
-        $data =  Permission::filter(request(['search']))->orderBy('id','DESC')->paginate(5);
+        if(request()->ajax()){
+            $data =  Permission::orderBy('id','DESC')->get();
+            $user = auth()->user();
+            return DataTables::of($data)
+            ->addIndexColumn()
+            ->make(true);
+        }        
         //dd($data);
-        return view('admin.permissions.index', compact('data'))
-        ->with('i', ($request->input('page', 1) - 1) * 5);
+        return view('admin.permissions.index');
     }
 
     public function create() 

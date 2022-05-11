@@ -30,8 +30,12 @@
                     </div>
                     <div class="card-body">
                         <dl class="row">
-                            <dt class="col-sm-4">Name</dt>
+                            <dt class="col-sm-4">Institute Name</dt>
                             <dd class="col-sm-8">{{ $customer->users->name }}</dd>
+                            <dt class="col-sm-4">Center Code</dt>
+                            <dd class="col-sm-8">{{ $customer->center_code }}</dd>
+                            <dt class="col-sm-4">Customer Name</dt>
+                            <dd class="col-sm-8">{{ $customer->cust_name }}</dd>
                             <dt class="col-sm-4">Email</dt>
                             <dd class="col-sm-8">
                             {{ $customer->users->email }}

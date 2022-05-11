@@ -30,37 +30,19 @@
 
               </div>
               <!-- /.card-header -->
-              <div class="card-body p-0">
-                <form class="form-inline ml-3 float-right" method="get" action="{{url('search')}}">
-                  <div class="input-group input-group-sm p-2">
-                    <input class="form-control" name="search" type="search" placeholder="Search" aria-label="Search">
-                   
-                  </div>
-                </form>
-                <table class="table table-striped">
+              <div class="card-body">
+                
+                <table class="table table-striped" id="user-datatable">
                   <thead>
                     <tr>
                       <th style="width: 10px">#</th>
                       <th>Name</th>
-                      <th style="width: 280px"></th>
                     </tr>
                   </thead>
                   <tbody>
-                    
-                    @foreach ($data as $key => $permission)
-                            <tr>
-                            <td>{{ ++$i }}</td>
-                                <td>{{ $permission->name }}</td>
-                                <td>
-                                   
-                                </td>
-                            </tr>
-                        @endforeach
-                    
+                                        
                   </tbody>
                 </table>
-                <!-- <div class="d-flex float-right p-2"> -->
-                {{ $data->links() }}
                 <!-- </div> -->
               </div>
               <!-- /.card-body -->
@@ -76,6 +58,39 @@
 @endsection
 @section('scripts')
 <script type="text/javascript" src="{{ asset('js/sweetalert.js') }}"></script>
+<script type="text/javascript" src="{{ asset('js/sweetalert.js') }}"></script>
+<script type="text/javascript" src="{{ asset('plugins/datatables/jquery.dataTables.min.js') }}" ></script>
+<script type="text/javascript" src="{{ asset('plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
+<script type="text/javascript" src="{{ asset('plugins/datatables-responsive/js/dataTables.responsive.min.js') }}"></script>
+<script type="text/javascript" src="{{ asset('plugins/datatables-responsive/js/responsive.bootstrap4.min.js') }}"></script>
+
+
+<script type="text/javascript">
+  $(document).ready(function() {
+  $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+        var table = $('#user-datatable').DataTable({
+            processing: true,
+            serverSide: true,
+            autoWidth: false,
+            ajax:'{!! route('permissions.index') !!}',
+            
+            columns: [
+                {
+                    data: 'DT_RowIndex',
+                    name: 'DT_RowIndex'
+                },
+                {
+                    data: 'name',
+                    name: 'name'
+                },
+            ]
+        });
+  });
+</script>
 @if($msg = session('success'))
 <script type="text/javascript">
   swal("Great job!","{{$msg}}",'success');

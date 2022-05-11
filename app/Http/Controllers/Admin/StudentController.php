@@ -6,20 +6,67 @@ use App\Http\Controllers\Controller;
 use App\Models\Student;
 use App\Models\User;
 use App\Jobs\SendEmailJob;
+use App\Rules\IdentityCheck;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Auth\Events\Registered;
+Use Image;
+use Intervention\Image\Exception\NotReadableException;
+use Yajra\DataTables\Facades\DataTables;
+use Illuminate\Validation\Rule;
 
 class StudentController extends Controller
 {
     public function index(Request $request)
     {
+        // $user = User::find(11);
+        // $user->sendEmailVerificationNotification();
         
-        $data = Student::with('users')->search(request(['search']))->orderBy('id','DESC')->paginate(5);
-      //dd($data);
-        return view('admin.students.index',compact('data'))
-        ->with('i', ($request->input('page', 1) - 1) * 5);
+        if(request()->ajax()){
+            return self::getDatatable();
+        };
+        return view('admin.students.index');
+    }
+    public function getDatatable(){
+        $data = Student::with('users')->orderBy('id','ASC')->get();
+        $user = auth()->user();
+        return DataTables::of($data)
+        ->addIndexColumn()
+        ->editColumn('name', function($row) use ($user){
+            if ($user->can('student-show')) {
+                return '<span class="username"><a href="'.route('students.show',$row->id).'">'.$row->users->name.'</a></span>';
+            }
+            return '<span class="username">'.$row->users->name.'</span>';
+                
+            
+        })
+        ->editColumn('email', function($row){
+            return '<i class="fas fa-envelope text-primary "></i> '.$row->users->email;
+        })
+        ->editColumn('phone', function($row){
+            return '<i class="fas fa-phone text-danger"></i> '.$row->phone.' '.$row->alt_phone;
+        })
+        ->addColumn('action', function($row) use ($user){
+            $btn = '';
+                if ($user->can('student-course-show')) {
+                    $btn .= '<a class="btn btn-warning btn-sm" href="'.route('studentcourses.index',['student_id'=>$row->id]).'">Courses</a> ';
+                }
+                if ($user->can('student-show')) {
+                    $btn .= '<a class="btn btn-success btn-sm" href="'.route('students.show',$row->id).'">Show</a> ';
+                } 
+                if ($user->can('student-edit')) {
+                    $btn .= '<a class="btn btn-primary btn-sm" href="'.route('students.edit',$row->id).'"><i class="fas fa-pencil-alt"></i></a> ';
+                } 
+                if ($user->can('student-delete')) {
+                    $btn .= \Form::open(['method' => 'DELETE','route' => ['students.destroy', $row->id],'style'=>'display:inline']) .
+                    \Form::button('<i class="fas fa-trash"></i>', ['type' => 'submit','class'=>'btn btn-danger btn-sm']).
+                    \Form::close();
+                    
+                } 
+            return $btn;
+        })
+        ->rawColumns(['name','email','phone','action'])
+        ->make(true);
     }
     public function create(){
         return view('admin.students.create');
@@ -29,6 +76,7 @@ class StudentController extends Controller
         //dd($student);
         return view('admin.students.show',compact('student'));
     }
+    
     public function store(Request $request)
     {
         $messages = [
@@ -44,14 +92,18 @@ class StudentController extends Controller
             'pincode2.regex' => 'The pincode format is invalid.',
         ];
         $this->validate($request, [
-            'name' => 'required|regex:/^[a-zA-Z]+ [a-zA-Z]+$/',
+            'name' => ['required','regex:/^([a-zA-Z0-9]+|[a-zA-Z0-9]+\s{1}[a-zA-Z0-9]{1,}|[a-zA-Z0-9]+\s{1}[a-zA-Z0-9]{3,}\s{1}[a-zA-Z0-9]{1,})$/'],
             'email' => 'required|email|unique:users,email',
             'phone' => ['regex:/^(\+)[1-9]{1}([0-9][\s]*){9,16}$/'],
             'birth' => ['regex:/^(\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01]))$/'],
             'admission' => ['regex:/^(\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01]))$/'],
             'gender' => 'required',
             'alt_phone' => ['nullable','regex:/^(\+)[1-9]{1}([0-9][\s]*){9,16}$/'],
-            'father_name' => 'required|regex:/^[a-zA-Z]+ [a-zA-Z]+$/',
+            'father_name' => ['required','regex:/^([a-zA-Z0-9]+|[a-zA-Z0-9]+\s{1}[a-zA-Z0-9]{1,}|[a-zA-Z0-9]+\s{1}[a-zA-Z0-9]{3,}\s{1}[a-zA-Z0-9]{1,})$/'],
+            'mother_name' => ['nullable','regex:/^([a-zA-Z0-9]+|[a-zA-Z0-9]+\s{1}[a-zA-Z0-9]{1,}|[a-zA-Z0-9]+\s{1}[a-zA-Z0-9]{3,}\s{1}[a-zA-Z0-9]{1,})$/'],
+            'education' => 'required',
+            'id_type' => ['nullable',Rule::in(['aadhar', 'pan', 'voter', 'drive', 'passport'])],
+            'id_number' => ['required_with:id_type',new IdentityCheck('id_type')],
             'address1'=> 'required|string',
             'state1' => 'required|string',
             'city1' => 'required|string',
@@ -61,6 +113,8 @@ class StudentController extends Controller
             'city2' => 'required_with:address2,state2,pincode2',
             'pincode2' => ['nullable','required_with:address2,state2,city2','regex:/^\d{4}$|^\d{6}$/'],
         ], $messages);
+
+        
         $random = str_shuffle('abcdefghjklmnopqrstuvwxyzABCDEFGHJKLMNOPQRSTUVWXYZ234567890!$%^&!$%^&');
         $password = substr($random, 0, 10);
         $input['name'] = $request->input('name');
@@ -86,6 +140,10 @@ class StudentController extends Controller
         $student['alt_phone'] = $request->input('alt_phone');
         
         $student['father_name'] = $request->input('father_name');
+        $student['mother_name'] = $request->input('mother_name');
+        $student['education'] = $request->input('education');
+        $student['id_type'] = $request->input('id_type');
+        $student['id_number'] = $request->input('id_number');
         $student['address1'] = $request->input('address1');
         $student['state1'] = $request->input('state1');
         $student['city1'] = $request->input('city1');
@@ -94,19 +152,21 @@ class StudentController extends Controller
         $student['state2'] = $request->input('state2');
         $student['city2'] = $request->input('city2');
         $student['pincode2'] = $request->input('pincode2');
-        //dd($student);    
+        //dd($student); 
+           
         if ($request->hasFile('image')) {
             $request->validate([
                 'image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
             ]);
-            $filenameWithExt = $request->file('image')->getClientOriginalName ();
+            $filenameWithExt = $request->file('image')->getClientOriginalName();
             // Get Filename
             $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
             // Get just Extension
             $extension = $request->file('image')->getClientOriginalExtension();
             // Filename To store
-            $fileNameToStore = $filename. '_'. time().'.'.$extension;
+            $fileNameToStore = $filename.'_'. time().'.'.$extension;
             // Upload Image
+            
             $path = $request->file('image')->storeAs('public/students', $fileNameToStore);
             $student['image'] = $fileNameToStore;
         }
@@ -139,14 +199,18 @@ class StudentController extends Controller
             'pincode2.regex' => 'The pincode format is invalid.',
         ];
         $this->validate($request, [
-            'name' => 'required|regex:/^[a-zA-Z]+ [a-zA-Z]+$/',
+            'name' => ['required','regex:/^([a-zA-Z0-9]+|[a-zA-Z0-9]+\s{1}[a-zA-Z0-9]{1,}|[a-zA-Z0-9]+\s{1}[a-zA-Z0-9]{3,}\s{1}[a-zA-Z0-9]{1,})$/'],
             'email' => 'required|email|unique:users,email,'.$student->user_id,
             'phone' => ['regex:/^(\+)[1-9]{1}([0-9][\s]*){9,16}$/'],
             'birth' => ['regex:/^(\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01]))$/'],
             'admission' => ['regex:/^(\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01]))$/'],
             'gender' => 'required',
             'alt_phone' => ['nullable','regex:/^(\+)[1-9]{1}([0-9][\s]*){9,16}$/'],
-            'father_name' => 'required|regex:/^[a-zA-Z]+ [a-zA-Z]+$/',
+            'father_name' => ['required','regex:/^([a-zA-Z0-9]+|[a-zA-Z0-9]+\s{1}[a-zA-Z0-9]{1,}|[a-zA-Z0-9]+\s{1}[a-zA-Z0-9]{3,}\s{1}[a-zA-Z0-9]{1,})$/'],
+            'mother_name' => ['nullable','regex:/^([a-zA-Z0-9]+|[a-zA-Z0-9]+\s{1}[a-zA-Z0-9]{1,}|[a-zA-Z0-9]+\s{1}[a-zA-Z0-9]{3,}\s{1}[a-zA-Z0-9]{1,})$/'],
+            'education' => 'required',
+            'id_type' => ['nullable',Rule::in(['aadhar', 'pan', 'voter', 'drive', 'passport'])],
+            'id_number' => ['required_with:id_type',new IdentityCheck('id_type')],
             'address1'=> 'required|string',
             'state1' => 'required|string',
             'city1' => 'required|string',
@@ -166,6 +230,10 @@ class StudentController extends Controller
         $student['alt_phone'] = $request->input('alt_phone');
         $student['admission'] = $request->input('admission');
         $student['father_name'] = $request->input('father_name');
+        $student['mother_name'] = $request->input('mother_name');
+        $student['education'] = $request->input('education');
+        $student['id_type'] = $request->input('id_type');
+        $student['id_number'] = $request->input('id_number');
         $student['address1'] = $request->input('address1');
         $student['state1'] = $request->input('state1');
         $student['city1'] = $request->input('city1');
@@ -180,14 +248,16 @@ class StudentController extends Controller
             $request->validate([
                 'image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
             ]);
+           
             $orignal_image = $student->getOriginal('image');
-            if($orignal_image!==NULL){
-                $exists = Storage::exists('storage/students/'. $orignal_image);
+            
+            if($orignal_image!=NULL){
+                $exists = Storage::exists('public/students/'. $orignal_image);
                 if ($exists) {
-                    Storage::delete('storage/students/'. $orignal_image);
+                    Storage::delete('public/students/'. $orignal_image);
                 }
             }
-            $filenameWithExt = $request->file('image')->getClientOriginalName ();
+            $filenameWithExt = $request->file('image')->getClientOriginalName();
             // Get Filename
             $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
             // Get just Extension
@@ -207,14 +277,15 @@ class StudentController extends Controller
     public function destroy($id)
     {
         $student = Student::findOrFail($id);
-        $student->users()->delete();
+        
         $orignal_image = $student->getOriginal('image');
         if($orignal_image!==NULL){
-            $exists = Storage::exists('storage/students/'. $orignal_image);
+            $exists = Storage::exists('public/students/'. $orignal_image);
             if ($exists) {
-                Storage::delete('storage/students/'. $orignal_image);
+                Storage::delete('public/students/'. $orignal_image);
             }
         }
+        $student->users()->delete();
         $student->delete();
 
         return redirect('/students')->with('success', 'Student successfully deleted');

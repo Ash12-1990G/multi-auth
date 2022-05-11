@@ -13,17 +13,21 @@ class GeoLocationController extends Controller
 	// public function index(){
 	// 	return view('admin.location.getcoordinate');
 	// }
-	public static function checkIfAddressWithin($latitude,$longitude){
+	public static function checkIfAddressWithin($latitude,$longitude,$edit_id){
 		$radius = self::EARTHS_RADIUS_KM;
 		$distance_km = self::DISTANCE_KM;
 		$customer          =       DB::table("customers");
 		
-		$customer          =       $customer->select("*", DB::raw($radius." * acos(cos(radians(" . $latitude . "))
+			$customer          =       $customer->select("*", DB::raw($radius." * acos(cos(radians(" . $latitude . "))
 		* cos(radians(latitude)) * cos(radians(longitude) - radians(" . $longitude . "))
 		+ sin(radians(" .$latitude. ")) * sin(radians(latitude))) AS distance"));
+		if($edit_id!==0){
+			$customer          =       $customer->where('id', '<>', $edit_id);
+		}
+		
 		$customer          =       $customer->having('distance', '<=', $distance_km);
 		$customer          =       $customer->orderBy('distance', 'asc');
-
+		
 		$customer          =       $customer->count();
 		return $customer;
 	}

@@ -15,13 +15,14 @@ class CreateCoursesTable extends Migration
     {
         Schema::create('courses', function (Blueprint $table) {
             $table->id();
+            $table->unsignedInteger('franchise_id');
             $table->string('name');
-            $table->string('code')->unique();
+            $table->string('course_code');
             $table->string('slug')->unique();
-            $table->longText('description')->nullable();
-            $table->float('price', 8, 2)->nullable();
-            $table->mediumText('meta_title');
-            $table->mediumText('meta_description');
+            $table->longText('description');
+            $table->float('price', 8, 2);
+            $table->mediumText('meta_title')->nullable();
+            $table->mediumText('meta_description')->nullable();
             $table->timestamps();
         });
     }
