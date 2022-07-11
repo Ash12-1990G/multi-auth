@@ -2,6 +2,7 @@
 @section('title')
   ACTI-INDIA Home
 @endsection
+
 @section('content')
 
 <div class="post-area pd-top-75 pd-bottom-50" id="trending">
@@ -177,7 +178,7 @@
                
                 
                     <div class="row">
-                        <div class="col-lg-3 col-sm-6">
+                        <div class="col-lg-3 col-sm-6 mb-2">
                             <div class="single-post-wrap p-3 blue-border h-100">
                                 
                                 <div class="details">
@@ -187,7 +188,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-lg-3 col-sm-6">
+                        <div class="col-lg-3 col-sm-6 mb-2">
                             <div class="single-post-wrap p-3 blue-border h-100">
                                 
                                 <div class="details">
@@ -198,7 +199,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-lg-3 col-sm-6">
+                        <div class="col-lg-3 col-sm-6 mb-2">
                             <div class="single-post-wrap p-3 blue-border h-100">
                                 
                                 <div class="details">
@@ -209,7 +210,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-lg-3 col-sm-6">
+                        <div class="col-lg-3 col-sm-6 mb-2">
                             <div class="single-post-wrap p-3 blue-border h-100">
                                 
                                 <div class="details">
@@ -232,6 +233,7 @@
 <script>
     var msg ="{{$msg}}";
     alert(msg);
+    
 </script>
 @endif
 @endsection

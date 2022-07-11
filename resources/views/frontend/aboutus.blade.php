@@ -31,9 +31,9 @@
         <div class="row">
             <div class="col-lg-12">
                 <div class="author-area style-two">
-                    <div class="media d-flex flex-row-reverse">
+                    <div class="media d-lg-flex flex-lg-row-reverse ">
                         <img src="{{ asset('storage/about/company.jpg') }}" alt="img">
-                        <div class="media-body align-self-center mt-4 mt-md-0 pe-4">
+                        <div class="media-body align-self-center mt-4 ms-0 mt-md-0 pe-4">
                             <h4 class="mb-2">Our Company</h4>
                             <!-- <strong class="mb-3 d-block">www.website.com</strong> -->
                         
@@ -80,9 +80,9 @@ As project leaders, our instructors also interview prospective candidates for pe
         <div class="row">
             <div class="col-lg-12">
                 <div class="author-area style-two">
-                    <div class="media d-flex flex-row-reverse">
+                    <div class="media d-lg-flex flex-lg-row-reverse ">
                         <img src="{{ asset('storage/about/commitment.jpg') }}" alt="img">
-                        <div class="media-body align-self-center mt-4 mt-md-0 pe-4">
+                        <div class="media-body align-self-center mt-4 ms-0 mt-md-0 pe-4">
                             <h4 class="mb-2">Our Commitment</h4>
                             <!-- <strong class="mb-3 d-block">www.website.com</strong> -->
                         

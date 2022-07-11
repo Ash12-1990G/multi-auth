@@ -26,9 +26,11 @@
 
                     <div class="card card-widget widget-user-2">
                         <div class="widget-user-header bg-info">
+                            @if($data->image!=null)
                             <div class="widget-user-image">
-                            <img class="img-circle elevation-2" src="../dist/img/user7-128x128.jpg" alt="User Avatar">
+                            <img class="img-circle elevation-2" src="{{asset('storage/students/' . $data->image)}}" alt="User Avatar">
                             </div>
+                            @endif
                             <!-- /.widget-user-image -->
                             <h3 class="widget-user-username">{{ $data->users->name }}</h3>
                             <h5 class="widget-user-desc">{{ $data->users->email }}</h5>
@@ -58,7 +60,7 @@
                                     <b>Mother</b> <a class="float-right">{{ $data->mother_name}}</a>
                                 </li>
                             </ul>
-                            
+                            <a class="btn btn-sm btn-danger" href="{{route('student.download.icard')}}"><i class="fas fa-file-download"></i> Download your Identity Card</a>
                         </div>
                     </div>
                     <!-- <div class="info-box mb-3 bg-secondary">
@@ -76,7 +78,7 @@
                     <div class="card card-primary card-outline">
                         <div class="card-header p-2">
                             <ul class="nav nav-pills" id="small-nav">
-                                <li class="nav-item"><a class="nav-link active" href="#residence" data-toggle="tab">Residence</a></li>
+                                <li class="nav-item"><a class="nav-link active" href="#residence" data-toggle="tab">Other Information</a></li>
                                 <li class="nav-item"><a class="nav-link" href="#changepassword" data-toggle="tab">Change Password</a></li>
                                 
                             </ul>
@@ -111,7 +113,7 @@
                                 </div>
                                 <div class="tab-pane" id="changepassword">
                                     
-                                    <form id="resetform" class="form-horizontal" method="POST" action="{{ route('student.passwordchange',$data->user_id) }}">
+                                    <form id="resetform" class="form-horizontal" method="POST" action="{{ route('student.passwordchange') }}">
                                          @csrf
                                     <div class="form-group row">
                                         <label for="password" class="col-sm-4 col-form-label">{{ __('New Password') }}</label>
@@ -153,12 +155,11 @@
 <script src="{{ asset('plugins/toastr/toastr.min.js') }}"></script>
 
 @if($msg = session('success'))
-{{$msg}}
+
+
 <script type="text/javascript">
-  
-  $(function() {
-    toastr.success("{{$msg}}");
-});
+  tosterMessage('success',"{{$msg}}")
+ 
 </script>
 @endif
 @if($errors->any())

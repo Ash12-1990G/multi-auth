@@ -48,10 +48,13 @@
                                 </p>
                             </div>
                             <div class="syllabus">
+                                
+
+                                @if(!empty($course->syllabus->description))
                                 <h6 class="text-grey font-weight-bold">Syllabus</h6>
-                                <p>
                                 {!! $course->syllabus->description !!}
-                                </p>
+                                @endif
+                                
                             </div>
                             
                         </div>

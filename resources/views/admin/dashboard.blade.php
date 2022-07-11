@@ -17,62 +17,83 @@
     </div>
     <div class="content">
       <div class="container-fluid">
-        <div class="row">
-          <div class="col-lg-6">
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title">Card title</h5>
+      <div class="row">
+        @can('franchise-list')
+          <div class="col-12 col-sm-6 col-md-3">
+            <a href="{{route('franchises.index')}}" class="text-dark">
+            <div class="info-box">
+              <span class="info-box-icon bg-info elevation-1"><i class="fas fa-shopping-bag"></i></span>
 
-                <p class="card-text">
-                  Some quick example text to build on the card title and make up the bulk of the card's
-                  content.
-                </p>
-
-                <a href="#" class="card-link">Card link</a>
-                <a href="#" class="card-link">Another link</a>
+              <div class="info-box-content">
+                <span class="info-box-text">Franchise</span>
+                <span class="info-box-number">
+                {{ $franchise }}
+                  <small></small>
+                </span>
               </div>
+              <!-- /.info-box-content -->
             </div>
-
-            <div class="card card-primary card-outline">
-              <div class="card-body">
-                <h5 class="card-title">Card title</h5>
-
-                <p class="card-text">
-                  Some quick example text to build on the card title and make up the bulk of the card's
-                  content.
-                </p>
-                <a href="#" class="card-link">Card link</a>
-                <a href="#" class="card-link">Another link</a>
-              </div>
-            </div><!-- /.card -->
+            </a>
+            <!-- /.info-box -->
           </div>
-          <!-- /.col-md-6 -->
-          <div class="col-lg-6">
-            <div class="card">
-              <div class="card-header">
-                <h5 class="m-0">Featured</h5>
-              </div>
-              <div class="card-body">
-                <h6 class="card-title">Special title treatment</h6>
+          @endcan
+          <!-- /.col -->
+          @can('user-list')
+          <div class="col-12 col-sm-6 col-md-3">
+            <a href="{{route('users.index')}}" class="text-dark">
+              <div class="info-box mb-3">
+                <span class="info-box-icon bg-danger elevation-1"><i class="fas fa-users-cog"></i></span>
 
-                <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-                <a href="#" class="btn btn-primary">Go somewhere</a>
+                <div class="info-box-content">
+                  <span class="info-box-text">Users</span>
+                  <span class="info-box-number">{{ $users }}</span>
+                </div>
+                <!-- /.info-box-content -->
               </div>
-            </div>
-
-            <div class="card card-primary card-outline">
-              <div class="card-header">
-                <h5 class="m-0">Featured</h5>
-              </div>
-              <div class="card-body">
-                <h6 class="card-title">Special title treatment</h6>
-
-                <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-                <a href="#" class="btn btn-primary">Go somewhere</a>
-              </div>
-            </div>
+            </a>
+            <!-- /.info-box -->
           </div>
-          <!-- /.col-md-6 -->
+          @endcan
+          <!-- /.col -->
+
+          <!-- fix for small devices only -->
+          <div class="clearfix hidden-md-up"></div>
+          @can('student-list')
+          <div class="col-12 col-sm-6 col-md-3">
+            <a href="{{route('students.index')}}" class="text-dark">
+              <div class="info-box mb-3">
+                <span class="info-box-icon bg-success elevation-1"><i class="fas fa-user-graduate"></i></span>
+
+                <div class="info-box-content">
+                  <span class="info-box-text">Students</span>
+                  <span class="info-box-number">{{ $students }}</span>
+                  
+                </div>
+                <!-- /.info-box-content -->
+                
+              </div>
+            </a>
+            <!-- /.info-box -->
+          </div>
+          @endcan
+          <!-- /.col -->
+          @can('customer-list')
+          <div class="col-12 col-sm-6 col-md-3">
+            <a href="{{route('customers.index')}}" class="text-dark">
+              <div class="info-box mb-3">
+                <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-university"></i></span>
+
+                <div class="info-box-content">
+                  <span class="info-box-text">Customers</span>
+                  <span class="info-box-number">{{ $customers }}</span>
+                </div>
+                <!-- /.info-box-content -->
+              </div>
+            </a>
+            <!-- /.info-box -->
+          </div>
+          @endcan
+          <!-- /.col -->
         </div>
         <!-- /.row -->
       </div><!-- /.container-fluid -->

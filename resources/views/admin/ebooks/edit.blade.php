@@ -24,7 +24,7 @@
                     <div class="card-header">
                         <h3 class="card-title">{{$book->courses->name}}</h3>
                     </div>
-                    <form class="g-3" action={{route('ebooks.update',$book->id)}} method="post" enctype="multipart/form-data">
+                    <form class="form-normal g-3" action={{route('ebooks.update',$book->id)}} method="post" enctype="multipart/form-data">
                     @csrf
                     @method('PATCH')
                         <div class="card-body">

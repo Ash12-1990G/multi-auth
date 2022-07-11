@@ -23,7 +23,7 @@
                     <div class="card-header">
                         <h3 class="card-title">{{$syllabus->courses->name}}</h3>
                     </div>
-                    <form class="g-3" action={{route('syllabus.update',$syllabus->id)}} method="post" enctype="multipart/form-data">
+                    <form class="form-normal g-3" action={{route('syllabus.update',$syllabus->id)}} method="post" enctype="multipart/form-data">
                     @csrf
                     @method('PATCH')
                         <div class="card-body">
@@ -53,7 +53,7 @@
 </div>
 @endsection
 @section('scripts')
-<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
+<script src="{{ asset('plugins/summernote/summernote-bs4.min.js') }}"></script>
 <script type="text/javascript">
     $(document).ready(function() {
         $('#description').summernote();

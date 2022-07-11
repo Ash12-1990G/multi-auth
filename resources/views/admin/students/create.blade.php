@@ -1,4 +1,7 @@
 @extends('admin.layouts.backend')
+@push('styles')
+<link rel="stylesheet" href="{{ asset('plugins/select2/css/select2.min.css') }}">
+@endpush
 @section('content')
 <div class="content-header">
     <div class="container-fluid">
@@ -8,8 +11,7 @@
             </div><!-- /.col -->
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
-                    <li class="breadcrumb-item"><a href="#">Home</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('students.index') }}">Student</a></li>
+                    <li class="breadcrumb-item"><a href="@if(auth()->user()->hasRole('Franchise-Admin')){{ route('customer.students.index') }} @else {{ route('students.index') }} @endif">Student</a></li>
                     <li class="breadcrumb-item active">New Student</li>
                 </ol>
             </div><!-- /.col -->
@@ -18,7 +20,8 @@
 </div>
 <div class="content">
     <div class="container-fluid">
-    <form class="g-3" action={{route('students.store')}} method="post" enctype="multipart/form-data">
+         <!-- <p><span class="bg-warning p-2">Note: <span class="text-danger fs-4">'*'</span> is required filed</span></p> -->
+    <form class="form-normal g-3" action="@if(auth()->user()->hasRole('Franchise-Admin')){{ route('customer.students.store') }} @else {{ route('students.store') }} @endif" method="post" enctype="multipart/form-data">
                     @csrf
         <div class="row">
             <div class="col-lg-6">
@@ -35,7 +38,7 @@
                         <div class="card-body row ">
                             <div class="form-group col-6">
                                 <label>Name</label>
-                                <input type="text" class="first-upper form-control {{ $errors->has('name') ? ' is-invalid' : '' }}" name="name" value="{{ old('name')}}">
+                                <input type="text" class="first-upper form-control {{ $errors->has('name') ? ' is-invalid' : '' }}" name="name" value="{{ old('name')}}" placeholder="Required">
                                 @if ($errors->has('name'))
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $errors->first('name') }}.</strong>
@@ -45,7 +48,7 @@
                             
                             <div class="form-group col-6">
                                 <label  class="form-label">Admission Date</label>
-                                <input type="text" name="admission" id="admission_datepicker" class="form-control {{ $errors->has('admission') ? ' is-invalid' : '' }}"  value="{{old('admission')}}">
+                                <input type="text" name="admission" id="admission_datepicker" class="form-control {{ $errors->has('admission') ? ' is-invalid' : '' }}"  value="{{old('admission')}}" placeholder="Required">
                                 @if ($errors->has('admission'))
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $errors->first('admission') }}.</strong>
@@ -69,7 +72,7 @@
                                 
                                 <label  class="form-label">Father's name</label>
                                 
-                                <input type="text" name="father_name"  class="first-upper form-control {{ $errors->has('father_name') ? ' is-invalid' : '' }}"  value="{{old('father_name')}}">
+                                <input type="text" name="father_name"  class="first-upper form-control {{ $errors->has('father_name') ? ' is-invalid' : '' }}"  value="{{old('father_name')}}" placeholder="Required">
                                 @if ($errors->has('father_name'))
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $errors->first('father_name') }}.</strong>
@@ -89,7 +92,7 @@
                             </div>
                             <div class="form-group col-6">
                                 <label for="inputPhone4" class="form-label">Date of Birth</label>
-                                <input type="text" name="birth" id="datepicker" class="form-control {{ $errors->has('birth') ? ' is-invalid' : '' }}"  value="{{old('birth')}}">
+                                <input type="text" name="birth" id="datepicker" class="form-control {{ $errors->has('birth') ? ' is-invalid' : '' }}"  value="{{old('birth')}}" placeholder="Required">
                                 @if ($errors->has('birth'))
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $errors->first('birth') }}.</strong>
@@ -99,7 +102,7 @@
                             
                             <div class="form-group col-6">
                                 <label for="inputPhone4" class="form-label">Education Qualification</label>
-                                <input type="text" name="education" class="form-control {{ $errors->has('education') ? ' is-invalid' : '' }}"  value="{{old('education')}}">
+                                <input type="text" name="education" class="form-control {{ $errors->has('education') ? ' is-invalid' : '' }}"  value="{{old('education')}}" placeholder="Required">
                                 @if ($errors->has('education'))
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $errors->first('education') }}.</strong>
@@ -109,14 +112,15 @@
                             <div class="form-group col-6">
                                 <label  class="form-label">Upload Photo</label>
                                 <div class="custom-file">
-                                    <input type="file" class="image custom-file-input" name="image">
+                                    <input type="file" class="image custom-file-input {{ $errors->has('image') ? ' is-invalid' : '' }}" name="image">
                                     <label class="custom-file-label" for="customFile">Choose file</label>
+                                
+                                    @if ($errors->has('image'))
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $errors->first('image') }}.</strong>
+                                    </span>
+                                    @endif
                                 </div>
-                                @if ($errors->has('image'))
-                                <span class="invalid-feedback" role="alert">
-                                    <strong>{{ $errors->first('image') }}.</strong>
-                                </span>
-                                @endif
                             </div>
                         
                         </div>
@@ -129,7 +133,7 @@
                     <div class="card-body row">
                         <div class="form-group col-6">
                                 <label for="inputEmail4" class="form-label">Email</label>
-                                <input type="email" name="email" class="form-control {{ $errors->has('email') ? ' is-invalid' : '' }}" id="inputEmail4" value="{{old('email')}}">
+                                <input type="email" name="email" class="form-control {{ $errors->has('email') ? ' is-invalid' : '' }}" id="inputEmail4" value="{{old('email')}}" placeholder="Required">
                                 @if ($errors->has('email'))
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $errors->first('email') }}.</strong>
@@ -138,7 +142,7 @@
                             </div>
                             <div class="form-group col-6">
                                 <label for="inputPhone4" class="form-label">Phone</label>
-                                <input type="text" name="phone" class="form-control {{ $errors->has('phone') ? ' is-invalid' : '' }}"  value="{{old('phone')}}">
+                                <input type="text" name="phone" class="form-control {{ $errors->has('phone') ? ' is-invalid' : '' }}"  value="{{old('phone')}}" placeholder="Required">
                                 @if ($errors->has('phone'))
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $errors->first('phone') }}.</strong>
@@ -196,6 +200,26 @@
                         </div>
                     </div>
                 </div>
+                <div class="card card-secondary">
+                    <div class="card-header">
+                        <h3 class="card-title">Select Center</h3>
+                    </div>
+                    
+                    <div class="card-body row ">
+                        
+                        <select class="form-control select2{{ $errors->has('customer_id') ? ' is-invalid' : '' }}" name="customer_id">
+                            @if(auth()->user()->hasRole('Franchise-Admin'))
+                            <option value="{{auth()->user()->customers->id}}">{{auth()->user()->name}}</option>
+                        
+                            @endif
+                        </select>
+                        @if ($errors->has('customer_id'))
+                        <span class="invalid-feedback" role="alert">
+                            <strong>{{ $errors->first('customer_id') }}.</strong>
+                        </span>
+                        @endif
+                    </div>
+                </div>
                 <div class="card card-info">
                     <div class="card-header card-header-custom">
                         <h3 class="card-title">Postal Address</h3>
@@ -205,7 +229,7 @@
                                 <p class="fw-bold form-sub-heading border-bottom">Current Address</p>
                                 <label  class="form-label">Address</label>
                                 
-                                <textarea name="address1"  class="form-control {{ $errors->has('address1') ? ' is-invalid' : '' }}">{{old('address1')}}</textarea>
+                                <textarea name="address1"  class="form-control {{ $errors->has('address1') ? ' is-invalid' : '' }}" placeholder="Required">{{old('address1')}}</textarea>
                                 @if ($errors->has('address1'))
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $errors->first('address1') }}.</strong>
@@ -216,7 +240,7 @@
                                 
                                 <label  class="form-label">City</label>
                                 
-                                <input type="text" name="city1"  class="first-upper form-control {{ $errors->has('city1') ? ' is-invalid' : '' }}"  value="{{old('city1')}}">
+                                <input type="text" name="city1"  class="first-upper form-control {{ $errors->has('city1') ? ' is-invalid' : '' }}"  value="{{old('city1')}}" placeholder="Required">
                                 @if ($errors->has('city1'))
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $errors->first('city1') }}.</strong>
@@ -227,7 +251,7 @@
                                 
                                 <label  class="form-label">State</label>
                                 
-                                <input type="text" name="state1"  class="first-upper form-control {{ $errors->has('state1') ? ' is-invalid' : '' }}"  value="{{old('state1')}}">
+                                <input type="text" name="state1"  class="first-upper form-control {{ $errors->has('state1') ? ' is-invalid' : '' }}"  value="{{old('state1')}}" placeholder="Required">
                                 @if ($errors->has('state1'))
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $errors->first('state1') }}.</strong>
@@ -238,7 +262,7 @@
                                 
                                 <label  class="form-label">Pincode</label>
                                 
-                                <input type="text" name="pincode1"  class="form-control {{ $errors->has('pincode1') ? ' is-invalid' : '' }}"  value="{{old('pincode1')}}">
+                                <input type="text" name="pincode1"  class="form-control {{ $errors->has('pincode1') ? ' is-invalid' : '' }}"  value="{{old('pincode1')}}" placeholder="Required">
                                 @if ($errors->has('pincode1'))
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $errors->first('pincode1') }}.</strong>
@@ -329,7 +353,46 @@
 @endsection
 @section('scripts')
 <script src="{{ asset('plugins/moment/moment.min.js') }}"></script>
+<script src="{{ asset('plugins/select2/js/select2.full.min.js') }}"></script>
 <script src="{{ asset('plugins/daterangepicker/daterangepicker.js') }}"></script>
+@if(auth()->user()->hasRole('Franchise-Admin'))
+<script>
+    $('.select2').select2({
+        placeholder: 'Select Center',
+    });
+</script>
+@else
+<script>
+    $('.select2').select2({
+        placeholder: 'Select Center',
+        allowClear: true,
+        ajax: {
+            url: '{!! route('student.customersearch') !!}',
+            dataType: 'json',
+            delay: 250,
+            processResults: function (data) {
+                console.log(data);
+                var fullname='';
+                var res = $.map(data, function (item) {
+                    fullname = item.users.name+" ("+item.center_code+")";
+                        return {
+                            text: fullname,
+                            id: item.id,
+                            selected: true,
+                        }
+                    })
+                return {
+                    
+                    results: res
+                    
+
+                };
+            },
+            cache: true
+        }
+    });
+</script>
+@endif
 <script>
 
     var $modal = $('#modal');

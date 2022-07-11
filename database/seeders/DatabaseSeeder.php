@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
@@ -23,13 +24,11 @@ class DatabaseSeeder extends Seeder
             PermissionSeeder::class,
         ]);
         
-        Role::create(
+        Role::insert([
             [
             'name' => 'super-admin',
             'guard_name' => 'web',
             ],
-        );
-        DB::table("permissions")->insert([
             [
                 'name' => 'Franchise-Admin',
                 'guard_name' => 'web',
@@ -39,12 +38,15 @@ class DatabaseSeeder extends Seeder
                 'guard_name' => 'web',
             ],
         ]);
+        // DB::table("permissions")->insert([
+            
+        // ]);
         User::create(
             [
                 'name' => 'Super Admin',
-                'email' => 'superadmin@gmail.com',
-                'email_verified_at' => now(),
-                'password' => Hash::make('ash@1290'), 
+                'email' => 'actiindia2022@gmail.com',
+                'email_verified_at' => Carbon::now()->toDateTimeString(),
+                'password' => Hash::make('acti@12#52022'), 
             ],
         );
         $role = Role::find(1);
@@ -58,7 +60,7 @@ class DatabaseSeeder extends Seeder
      
         $user->assignRole([$role->id]);
 
-        $franchise->givePermissionTo(['student_list','student_add','student_edit','student_delete','student_show']);
+        $franchise->givePermissionTo(['student_list','student_add','student_edit','student_delete','student_show','student-course-list','student-course-add','student-course-edit','student-course-delete']);
         $franchise->givePermissionTo('course_list');
     }
 }

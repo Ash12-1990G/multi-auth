@@ -6,6 +6,7 @@ use App\Providers\RouteServiceProvider;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Spatie\Permission\Models\Role;
 
 class RedirectIfAuthenticated
 {
@@ -20,15 +21,17 @@ class RedirectIfAuthenticated
     public function handle(Request $request, Closure $next, ...$guards)
     {
         // dd($next($request));
+      
         $guards = empty($guards) ? [null] : $guards;
         $users = Auth::user();
-      
+       
+        $otherRoles = Role::whereNotIn('name', ['Franchise-Admin','Student-Admin'])->pluck('name')->toArray();
         foreach ($guards as $guard) {
             
             if (Auth::guard($guard)->check()) {
                 //return redirect(RouteServiceProvider::HOME);
                 // to admin dashboard
-                if($users->hasRole('super-admin')) {
+                if($users->hasAnyRole($otherRoles)) {
                    
                     return redirect(route('admin.dashboard'));
                 }
@@ -36,6 +39,9 @@ class RedirectIfAuthenticated
                 // to user dashboard
                 else if($users->hasRole('Student-Admin')) {
                     return redirect(route('student.dashboard'));
+                }
+                else if($users->hasRole('Franchise-Admin')) {
+                    return redirect(route('customer.dashboard'));
                 }
             }
         }

@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Models\Role;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements MustVerifyEmail
@@ -53,9 +54,16 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasOne(Customer::class);
     }
+    public function courses()
+    {
+        return $this->belongsToMany(Course::class,'reviews','user_id','course_id')
+        ->withPivot('id','user_id','course_id','rating','comment','created_at')
+        ->withTimestamps();
+    }
     //override sendEmailVerificationNotification to send email verification in queue
     public function sendEmailVerificationNotification()
-    {
+    { 
+
             $this->notify(new \App\Notifications\Auth\QueuedVerifyEmail);
                 
     }

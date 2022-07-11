@@ -41,7 +41,7 @@
                     <li><a href="#">Privacy Policy</a></li>
                     <li><a href="{{ route('front.contact') }}">Contact</a></li>
                 </ul>
-                <p>Copyright ©2021 <a href="{{ route('front.home') }}">ACTI-INDIA</a></p>
+                <p>Copyright ©2022 <a href="{{ route('front.home') }}">ACTI-INDIA</a></p>
             </div>
         </div>
     </div>

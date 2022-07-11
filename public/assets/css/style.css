@@ -1941,7 +1941,7 @@ ul {
   transition-duration: 0.5s;
   border: 0;
   background: transparent;
-  top: 9px;
+  top: 20px;
 }
 .toggle-btn .icon-left {
   transition-duration: 0.5s;
@@ -3523,4 +3523,7 @@ ul {
 }
 .widget_nav_menu li:last-child:after {
   display: none;
+}
+.responsive-mobile-menu>.logo{
+  background: #fff;
 }

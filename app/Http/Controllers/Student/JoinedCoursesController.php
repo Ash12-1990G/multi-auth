@@ -3,20 +3,19 @@
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
+use App\Models\Review;
 use App\Modules\Course\CourseService;
 use App\Modules\Course\Ebooks\EbookService;
 use App\Modules\Student\StudentCourse\HasCourse;
 use Illuminate\Http\Request;
 use App\Modules\Student\StudentService;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Response;
-use Illuminate\Support\Facades\Storage;
 
 class JoinedCoursesController extends Controller
 {
-    public $course;
-    public $ebook;
+    protected $course;
+    protected $ebook;
+
 
     public function __construct()
     {
@@ -31,16 +30,21 @@ class JoinedCoursesController extends Controller
         return view('student.joinedcourse',compact('course'))->with('i', ($request->input('page', 1) - 1) * 5);
     }
     public function show($course,$tab){
+        $check = $this->course->checkStudentCourse($course);
+        if($check==0){
+            abort(404);
+        }
         $item = new CourseService();
         $data = $item->getCoursesById($course);
+        $review = Review::where('course_id',$course)->where('user_id',auth()->user()->id)->first();
         // $ebook = new EbookService();
         // $ebooks = $ebook->getBookByCourse($course);
         
-        if($tab!=='description' && $tab!=='syllabus' && $tab!=='ebook'){
+        if($tab!=='description' && $tab!=='syllabus' && $tab!=='ebook' && $tab!='review'){
             abort(404);
         }
-       // dd($data);
-        return view('student.viewcourse',compact('data','tab'));
+        //dd($review);
+        return view('student.viewcourse',compact('data','tab','review'));
     }
     public function getEbooks(Request $request){
         $ebooks = [];
@@ -54,8 +58,7 @@ class JoinedCoursesController extends Controller
     public function download($file)
     {
         
-        $book = new EbookService();
-        return $book->ebookDownload($file);
+        return $this->book->ebookDownload($file);
        
         
     }

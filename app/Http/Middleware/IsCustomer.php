@@ -20,17 +20,19 @@ class IsCustomer
         if (Auth::check()) {
             if(Auth::user()->hasRole(['Franchise-Admin']))
             {
-                return redirect(route('/dashboard'));
+                //return redirect(route('admin.dashboard'));
+                return $next($request);
             }
             else
             {
                 Auth::logout();
-                return redirect('/')->with('status','Access Denied! as you are not as admin');
+                return redirect()->route('customer.signin')->with('status','Access Denied! as you are not a admin');
             }
-            return $next($request);
+            
         }
         else{
-            return redirect('/customer/login');
+            return redirect()->route('customer.signin');
+
         }
         
         

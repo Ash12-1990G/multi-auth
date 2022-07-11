@@ -6,23 +6,36 @@ use App\Models\Course;
 use App\Http\Controllers\Controller;
 use App\Models\Franchise;
 use App\Models\Syllabus;
+use App\Modules\Student\StudentCourse\HasCourse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Yajra\DataTables\Facades\DataTables;
 
 class CourseController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:course-list', ['only' => ['index','getDatatable']]);
+         $this->middleware('permission:course-create', ['only' => ['create','store']]);
+         $this->middleware('permission:course-edit', ['only' => ['edit','update']]);
+         $this->middleware('permission:course-delete', ['only' => ['destroy']]);
+    }
     public function index(Request $request){
-        
+      
         if(request()->ajax()){
             return self::getDatatable();
         }
+       
       
         return view('admin.courses.index');
     }
 
     public function getDatatable(){
-        $data = Course::with('franchises:id,name,franchise_code')->get();
+        
+            $data = Course::with('franchises:id,name,franchise_code')->get();
+        
+        
         $user = auth()->user();
         return DataTables::of($data)
         ->addIndexColumn()
@@ -38,6 +51,9 @@ class CourseController extends Controller
         
         ->addColumn('action', function($row) use ($user){
             $btn = '';
+            if ($user->can('review-show')) {
+                $btn .= '<a class="btn btn-warning btn-sm mb-1" href="'.route('course.reviews',['course'=>$row->id]).'">Reviews</a> ';
+            }
             if ($user->can('syllabus-show')) {
                 $btn .= '<a class="btn btn-secondary btn-sm mb-1" href="'.route('syllabus.show',$row->id).'">Syllabus</a> ';
             }
@@ -71,6 +87,7 @@ class CourseController extends Controller
         $course = Course::find($id);
         return view('admin.courses.show',compact('course'));
     }
+    
     public function store(Request $request){
         $this->validate($request, [
             'name' => 'required',
@@ -78,8 +95,22 @@ class CourseController extends Controller
             'franchise_id' => 'required|exists:franchises,id',
             'description' => 'required|string',
             'price' => 'required|regex:/^\d+(\.\d{1,2})?$/',
+            'image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
         ]);
-
+        if ($request->hasFile('image')) {
+            
+            $filenameWithExt = $request->file('image')->getClientOriginalName();
+            // Get Filename
+            $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
+            // Get just Extension
+            $extension = $request->file('image')->getClientOriginalExtension();
+            // Filename To store
+            $fileNameToStore = $filename.'_'. time().'.'.$extension;
+            // Upload Image
+            
+            $path = $request->file('image')->storeAs('public/courses', $fileNameToStore);
+            $course['image'] = $fileNameToStore;
+        }
         $course['name'] = $request->input('name');
         $course['slug'] = $request->input('slug');
         $course['franchise_id'] = $request->input('franchise_id');
@@ -90,8 +121,8 @@ class CourseController extends Controller
         $course['meta_description'] = $request->input('meta_description');
 
         $added_course = Course::create($course);
-        $unique_code['course_code'] =  'CRSE'.date('Y'). str_pad($added_course->id, 4, '0', STR_PAD_LEFT);
-        $added_course->save($unique_code);
+        $added_course['course_code'] =  'CRSE'.date('Y'). str_pad($added_course->id, 4, '0', STR_PAD_LEFT);
+        $added_course->save();
         return redirect()->route('courses.index')
                         ->with('success','Course created successfully');
         
@@ -117,6 +148,30 @@ class CourseController extends Controller
         $course['price'] = $request->input('price');
         $course['meta_title'] = $request->input('meta_title');
         $course['meta_description'] = $request->input('meta_description');
+        if ($request->hasFile('image')) {
+            $request->validate([
+                'image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            ]);
+           
+            $orignal_image = $course->getOriginal('image');
+            
+            if($orignal_image!=NULL){
+                $exists = Storage::exists('courses/'. $orignal_image);
+                if ($exists) {
+                    Storage::delete('courses/'. $orignal_image);
+                }
+            }
+            $filenameWithExt = $request->file('image')->getClientOriginalName();
+            // Get Filename
+            $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
+            // Get just Extension
+            $extension = $request->file('image')->getClientOriginalExtension();
+            // Filename To store
+            $fileNameToStore = $filename. '_'. time().'.'.$extension;
+            // Upload Image
+            $path = $request->file('image')->storeAs('public/courses', $fileNameToStore);
+            $course['image'] = $fileNameToStore;
+        }
         //$course['course_code'] =  'CRSE'.date('Y'). str_pad($course->id, 4, '0', STR_PAD_LEFT);
         $course->update();
              return redirect()->route('courses.index')
@@ -125,9 +180,21 @@ class CourseController extends Controller
     public function destroy($id)
     {
         $course = Course::findOrFail($id);
-        $course->syllabus()->delete();
-        $course->delete();
+        //dd($course->students()->count());
+        if($course->students()->count()==0){
+            $course->syllabus()->delete();
+            $course->ebooks()->delete();
+            $orignal_image = $course->getOriginal('image');
+            if($orignal_image!=NULL){
+                $exists = Storage::exists('public/courses/'. $orignal_image);
+                if ($exists) {
+                    Storage::delete('public/courses/'. $orignal_image);
+                }
+            }
+            $course->delete();
 
-        return redirect('/courses')->with('success', 'Course successfully deleted');
+            return redirect()->route('courses.index')->with('success', 'Course successfully deleted');
+        }
+        return redirect()->route('courses.index')->with('warning', 'This course has been assigned to a student. Hence, course can not be deleted.');
     }
 }

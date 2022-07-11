@@ -10,10 +10,6 @@ use Illuminate\Validation\ValidationException;
 
 class StudenLoginController extends Controller
 {
-    
-
-    
-
     public function __construct()
     {
         $this->middleware('guest')->except('logout');
@@ -37,9 +33,5 @@ class StudenLoginController extends Controller
     }
     public function index(){
         return view('frontend.login.studentlogin');
-    }
-    
-
-
-    
+    }  
 }

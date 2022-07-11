@@ -21,6 +21,7 @@ class CreateCoursesTable extends Migration
             $table->string('slug')->unique();
             $table->longText('description');
             $table->float('price', 8, 2);
+            $table->string('image');
             $table->mediumText('meta_title')->nullable();
             $table->mediumText('meta_description')->nullable();
             $table->timestamps();

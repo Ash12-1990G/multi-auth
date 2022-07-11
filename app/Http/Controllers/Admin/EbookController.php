@@ -14,6 +14,13 @@ use Yajra\DataTables\Facades\DataTables;
 
 class EbookController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:ebook-list', ['only' => ['index','getDatatable']]);
+        $this->middleware('permission:ebook-add', ['only' => ['create','store']]);
+        $this->middleware('permission:ebook-edit', ['only' => ['edit','update']]);
+        $this->middleware('permission:ebook-delete', ['only' => ['destroy']]);
+    }
     public function index(Request $request,$course_id){
         // $ebook =  Ebook::where('course_id',$course_id)->paginate(5);
         $course =  Course::find($course_id);

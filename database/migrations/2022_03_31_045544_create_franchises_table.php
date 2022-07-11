@@ -20,7 +20,7 @@ class CreateFranchisesTable extends Migration
             $table->string('subname');
             $table->LongText('details');
             $table->float('cost', 8, 2);
-            $table->float('discount', 8, 2)->default('0');
+            
             $table->smallInteger('service_period')->unsigned()->default('0');
             $table->string('service_interval')->default('month');
             $table->string('image')->nullable();

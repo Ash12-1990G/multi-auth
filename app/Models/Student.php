@@ -10,6 +10,7 @@ class Student extends Model
     use HasFactory;
     protected $fillable = [
         'user_id',
+        'customer_id',
         'admission',
         'phone',
         'birth',
@@ -36,7 +37,24 @@ class Student extends Model
     {
         return $this->belongsTo(User::class,'user_id');
     }
-
+    public function customers()
+    {
+        return $this->belongsTo(Customer::class,'customer_id');
+    }
+    public function courses(){
+        return $this->belongsToMany(Course::class,'course_student')
+        
+        ->withPivot('id','roll_no', 'start_date','price','discount')
+        ->withTimestamps();
+    }
+    
+    
+  
+    // public function studentCourses()
+    // {
+    //     return $this->hasMany(StudentCourse::class);
+    // }
+    
     public function scopeSearch($query, array $filters){
         $query->when($filters['search'] ?? false,function($query,$search){
             $query

@@ -8,7 +8,6 @@
             </div><!-- /.col -->
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
-                    <li class="breadcrumb-item"><a href="#">Home</a></li>
                     <li class="breadcrumb-item active">Students</li>
                 </ol>
             </div><!-- /.col -->
@@ -25,7 +24,7 @@
                 <h3 class="card-title">List of students</h3>
                 <div class="card-tools">
                 @can('student-add')
-                <a class="btn btn-primary btn-sm"  href="{{ route('students.create') }}">New Student</a>
+                <a class="btn btn-primary btn-sm"  href="@if(auth()->user()->hasRole('Franchise-Admin')){{ route('customer.students.create') }} @else {{ route('students.create') }} @endif">New Student</a>
                 @endcan
                 </div>
 
@@ -40,6 +39,7 @@
                       <th>Name</th>
                       <th>Email</th>
                       <th>Phone</th>
+                      <th>Center</th>
                       <th style="width: 280px">Action</th>
                     </tr>
                   </thead>
@@ -65,7 +65,15 @@
 <script type="text/javascript" src="{{ asset('plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
 <script type="text/javascript" src="{{ asset('plugins/datatables-responsive/js/dataTables.responsive.min.js') }}"></script>
 <script type="text/javascript" src="{{ asset('plugins/datatables-responsive/js/responsive.bootstrap4.min.js') }}"></script>
-
+@if(auth()->user()->hasRole('Franchise-Admin'))
+<script type="text/javascript">
+  var urlStudent = '{!! route('customer.students.index') !!}'
+</script>
+@else
+<script type="text/javascript">
+  var urlStudent = '{!! route('students.index') !!}'
+</script>
+@endif
 
 <script type="text/javascript">
   $(document).ready(function() {
@@ -74,13 +82,8 @@
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
     });
-        var table = $('#user-datatable').DataTable({
-            processing: true,
-            serverSide: true,
-            autoWidth: false,
-            ajax:'{!! route('students.index') !!}',
-            
-            columns: [
+  
+    var column = [
                 {
                     data: 'DT_RowIndex',
                     name: 'DT_RowIndex'
@@ -98,16 +101,32 @@
                     name: 'phone'
                 },
                 {
+                    data: 'center',
+                    name: 'center'
+                },
+                {
                     data: 'action',
                     name: 'action'
                 },
-            ]
+            ];
+        var table = $('#user-datatable').DataTable({
+            processing: true,
+            serverSide: true,
+            autoWidth: false,
+            ajax:urlStudent,
+            
+            columns: column
         });
   });
 </script>
 @if($msg = session('success'))
 <script type="text/javascript">
   swal("Great job!","{{$msg}}",'success');
+</script>
+@endif
+@if($msg = session('warning'))
+<script type="text/javascript">
+  swal("Sorry!","{{$msg}}",'warning');
 </script>
 @endif
 @endsection

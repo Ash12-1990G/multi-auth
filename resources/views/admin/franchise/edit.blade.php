@@ -23,7 +23,7 @@
                     <div class="card-header">
                         <h3 class="card-title">Edit franchise</h3>
                     </div>
-                    <form class="g-3" action={{route('franchises.update',$franchise->id)}} method="post" enctype="multipart/form-data">
+                    <form class="form-normal g-3" action={{route('franchises.update',$franchise->id)}} method="post" enctype="multipart/form-data">
                     @csrf
                     @method('PATCH')
                         <div class="card-body">
@@ -71,14 +71,14 @@
                                     </span>
                                     @endif
                                 </div>
-                                <div class="col-sm-3">
+                                <!-- <div class="col-sm-3">
                                     <input type="text" name="discount" class="form-control {{ $errors->has('discount') ? ' is-invalid' : '' }}" placeholder="" value="{{ old('discount',$franchise->discount)}}">
                                     @if ($errors->has('discount'))
                                     <span class="invalid-feedback" role="alert">
                                         <strong>{{ $errors->first('discount') }}.</strong>
                                     </span>
                                     @endif
-                                </div>
+                                </div> -->
                             
                                 <!-- <label class="col-sm-2 col-form-label">Cost/Fee</label> -->
                                                           

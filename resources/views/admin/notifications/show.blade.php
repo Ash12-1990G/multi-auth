@@ -8,7 +8,7 @@
             </div><!-- /.col -->
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
-                    <li class="breadcrumb-item"><a href="{{ route('notifications.index') }}">Notifications</a></li>
+                    <li class="breadcrumb-item"><a href="@if(auth()->user()->hasRole('Student-Admin')) {{route('student.notifications.index')}} @elseif(auth()->user()->hasRole('Franchise-Admin')) {{route('customer.notifications.index')}} @else {{route('notifications.index')}} @endif">Notifications</a></li>
                     <li class="breadcrumb-item active">Show</li>
                 </ol>
             </div><!-- /.col -->
@@ -30,12 +30,20 @@
            
                     <div class="card-body p-2">
                         <div class="mailbox-read-info">
-                            <h5>@if($notice->type == 'App\Notifications\FailedJobsNotice')
+                            <h5>Subject: @if($notice->type == 'App\Notifications\FailedJobsNotice')
                                 Registration Mail Failure
+                                @elseif($notice->type == 'App\Notifications\PostNotice')
+                                    {{ $notice->data['subject'] }}
                                 @endif
                             </h5>
-                            <h6>To: {{ $notice->data['email'] }}
+                            <h6>@if($notice->type == 'App\Notifications\FailedJobsNotice')
+                                To: {{ $notice->data['email'] }}
+                                @endif
+                                @if(isset($sender))
+                                    From: {{$sender}}
+                                @endif
                             <span class="mailbox-read-time float-right">{{ $notice->created_at->format('j F, Y, g:i a')}}</span></h6>
+                           
                         </div>
                     <!-- /.mailbox-read-info -->
                     
@@ -43,6 +51,7 @@
                     <div class="mailbox-read-message">
 
                         <p>{{ $notice->data['message'] }}</p>
+                        
                     </div>
                     <!-- /.mailbox-read-message -->
                     </div>

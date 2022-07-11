@@ -6,7 +6,7 @@
                     <div class="col-lg-6 col-md-7 align-self-center">
                         <div class="topbar-menu text-md-left">
                             <ul class="align-self-center">
-                                <li><a href="mailto:souravroy4243@gmai.com"><i class="fa fa-envelope"></i> souravroy4243@gmai.com</a></li>
+                                <li><a href="mailto:souravroy4243@gmail.com"><i class="fa fa-envelope"></i> souravroy4243@gmail.com</a></li>
                                 <li><a href=""><i class="fa fa-phone"></i> +91 7063656983</a></li>
                             </ul>
                         </div>
@@ -14,7 +14,7 @@
                     <div class="col-lg-6 col-md-5 mt-2 mt-md-0 text-md-right">
                         <div class="topbar-social">
                             <div class="topbar-date d-none d-lg-inline-block">
-                                Login
+                                <a href="{{route('customer.signin')}}">Customer Login</a>
                             </div>
                             <ul class="social-area social-area-2">
                                 <li><a class="facebook-icon" href="#"><i class="fa fa-facebook"></i></a></li>
@@ -36,7 +36,7 @@
                 <div class="row">
                     <div class="col-xl-6 col-lg-5 align-self-center">
                         <div class="logo text-md-left">
-                            <a class="main-logo" href="index.html"><img src="{{ asset('storage/logo/logo.png') }}" alt="img"> </a>
+                            <a class="main-logo" href="{{route('front.home')}}"><img src="{{ asset('storage/logo/logo.png') }}" alt="img"> </a>
                         </div>
                     </div>
                     <div class="col-xl-6 col-lg-7 text-md-right p-2">
@@ -54,7 +54,7 @@
             <div class="container nav-container">
                 <div class="responsive-mobile-menu">
                     <div class="logo d-lg-none d-block">
-                        <a class="main-logo" href="index.html"><img src="{{ asset('storage/logo/logo.png') }}" alt="img"></a>
+                        <a class="main-logo" href="{{route('front.home')}}"><img src="{{ asset('storage/logo/logo.png') }}" alt="img"></a>
                     </div>
                     <button class="menu toggle-btn d-block d-lg-none" data-target="#nextpage_main_menu" 
                     aria-expanded="false" aria-label="Toggle navigation">
@@ -62,9 +62,9 @@
                         <span class="icon-right"></span>
                     </button>
                 </div>
-                <div class="nav-right-part nav-right-part-mobile">
+                <!-- <div class="nav-right-part nav-right-part-mobile">
                     <a class="search header-search" href="#"><i class="fa fa-search"></i></a>
-                </div>
+                </div> -->
                 <div class="collapse navbar-collapse" id="nextpage_main_menu">
                     <ul class="navbar-nav menu-open">
                         <li class="current-menu-item">
@@ -86,7 +86,8 @@
                         <li class="menu-item-has-children current-menu-item">
                             <a href="#">Student Corner</a>
                             <ul class="sub-menu">
-                                <li><a href="{{ route('student.signin') }}">Login</a></li>
+                                <li><a href="{{route('student.signin')}}">Login</a></li>
+                               
                             </ul>
                         </li> 
                         <li class="current-menu-item">
@@ -99,43 +100,7 @@
                     </ul>
                 </div>
                 <div class="nav-right-part nav-right-part-desktop">
-                <!-- <ul class="navbar-nav ml-auto">
-                        
-                        @guest
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a>
-                            </li>
-                            
-                            
-                        @else
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" id="dropdownMenuButton1" href="#" id="navbarDropdown1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    {{ Auth::user()->name }}
-                                </a>
-                                
-                                <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown1">
-                                  <li>
-                                    <a class="dropdown-item" href="{{ url('/dashboard') }}">Dashboard</a>
-                                  </li>
-                                  <li>  
-                                    <a class="dropdown-item" href="{{ route('logout') }}"
-                                       onclick="event.preventDefault();
-                                                     document.getElementById('logout-form').submit();">
-                                        {{ __('Logout') }}
-                                    </a>
-
-                                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                                        @csrf
-                                    </form>
-                                  </li>
-                                </ul>
-                            </li>
-                           
-                          
-                        
-                        @endguest
-                        
-                    </ul> -->
+                
                     
                 </div>
             </div>

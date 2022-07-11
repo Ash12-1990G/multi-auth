@@ -16,6 +16,7 @@ class CreateStudentsTable extends Migration
         Schema::create('students', function (Blueprint $table) {
             $table->id();
             $table->unsignedInteger('user_id');
+            $table->foreignId('customer_id')->constrained()->onDelete('cascade');
             $table->date('admission');
             $table->string('phone');
             $table->date('birth');
@@ -23,7 +24,7 @@ class CreateStudentsTable extends Migration
             $table->string('alt_phone')->nullable();
             $table->string('father_name');
             $table->string('mother_name')->nullable();
-            $table->string('education_name');
+            $table->string('education');
             $table->string('id_type')->nullable();
             $table->string('id_number')->nullable();
             $table->string('image')->nullable();

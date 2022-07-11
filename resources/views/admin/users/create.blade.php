@@ -1,4 +1,8 @@
 @extends('admin.layouts.backend')
+@push('styles')
+<link rel="stylesheet" href="{{ asset('plugins/select2/css/select2.min.css') }}">
+
+@endpush
 @section('content')
 <div class="content-header">
     <div class="container-fluid">
@@ -31,7 +35,7 @@
                     
                     
                       
-                    <form class="g-3" action={{route('users.store')}} method="post" enctype="multipart/form-data">
+                    <form class="form-normal g-3" action={{route('users.store')}} method="post" enctype="multipart/form-data">
                     @csrf
                         <div class="card-body">
                             <div class="form-group row">

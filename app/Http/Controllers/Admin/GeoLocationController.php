@@ -13,21 +13,24 @@ class GeoLocationController extends Controller
 	// public function index(){
 	// 	return view('admin.location.getcoordinate');
 	// }
+	
 	public static function checkIfAddressWithin($latitude,$longitude,$edit_id){
 		$radius = self::EARTHS_RADIUS_KM;
 		$distance_km = self::DISTANCE_KM;
 		$customer          =       DB::table("customers");
 		
-			$customer          =       $customer->select("*", DB::raw($radius." * acos(cos(radians(" . $latitude . "))
-		* cos(radians(latitude)) * cos(radians(longitude) - radians(" . $longitude . "))
-		+ sin(radians(" .$latitude. ")) * sin(radians(latitude))) AS distance"));
+		$customer          =       $customer->select("*", DB::raw("(((acos(sin((".$latitude."*pi()/180)) * sin((`latitude`*pi()/180)) + cos((".$latitude."*pi()/180)) * cos((`latitude`*pi()/180)) * cos(((".$longitude."- `longitude`)*pi()/180)))) * 180/pi()) * 60 * 1.1515) AS distance"));
+
+		// $customer          =       $customer->select("*", DB::raw($radius." * acos(cos(radians(" . $latitude . "))
+		// * cos(radians(latitude)) * cos(radians(longitude) - radians(" . $longitude . "))
+		// + sin(radians(" .$latitude. ")) * sin(radians(latitude))) AS distance"));
 		if($edit_id!==0){
 			$customer          =       $customer->where('id', '<>', $edit_id);
 		}
 		
 		$customer          =       $customer->having('distance', '<=', $distance_km);
 		$customer          =       $customer->orderBy('distance', 'asc');
-		
+		//$customer          =       $customer->toSql();
 		$customer          =       $customer->count();
 		return $customer;
 	}

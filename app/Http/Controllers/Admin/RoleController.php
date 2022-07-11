@@ -35,20 +35,20 @@ class RoleController extends Controller
         ->addIndexColumn()
         ->addColumn('action', function($role) use ($user){
             $btn = '';
-            if($role->name !== 'super-admin' && $role->name !== 'Franchise-Admin' && $role->name !== 'Student-Admin'){
-                if ($user->can('role-show')) {
-                    $btn .= '<a class="btn btn-success btn-sm" href="'.route('roles.show',$role->id).'">Show</a> ';
-                } 
+           // if($role->name !== 'super-admin' && $role->name !== 'Franchise-Admin' && $role->name !== 'Student-Admin'){
+                // if ($user->can('role-show')) {
+                //     $btn .= '<a class="btn btn-success btn-sm" href="'.route('roles.show',$role->id).'">Show</a> ';
+                // } 
                 if ($user->can('role-edit')) {
                     $btn .= '<a class="btn btn-primary btn-sm" href="'.route('roles.edit',$role->id).'"><i class="fas fa-pencil-alt"></i></a> ';
                 } 
-                if ($user->can('role-delete') && $role->users_count==0) {
+                if ($user->can('role-delete') && ($role->name!='Franchise-Admin' && $role->name!='super-admin' && $role->name!='Student-Admin')) {
                     $btn .= \Form::open(['method' => 'DELETE','route' => ['roles.destroy', $role->id],'style'=>'display:inline']) .
                     \Form::button('<i class="fas fa-trash"></i>', ['type' => 'submit','class'=>'btn btn-danger btn-sm']).
                     \Form::close();
                     
                 } 
-            }
+//}
             return $btn;
         })
         ->rawColumns(['action'])
@@ -58,7 +58,7 @@ class RoleController extends Controller
     
     public function create()
     {
-        $permission = Permission::where('id','>',10)->orderBy('name')->get();
+        $permission = Permission::where('name','not like','permission%')->where('name','not like','role%')->orderBy('name')->get();
         return view('admin.roles.create',compact('permission'));
     }
     
@@ -79,6 +79,7 @@ class RoleController extends Controller
    
     public function show($id)
     {
+        abort(404);
         $role = Role::find($id);
         $rolePermissions = Permission::join("role_has_permissions","role_has_permissions.permission_id","=","permissions.id")
             ->where("role_has_permissions.role_id",$id)
@@ -90,7 +91,7 @@ class RoleController extends Controller
     public function edit($id)
     {
         $role = Role::find($id);
-        $permission = Permission::get();
+        $permission = Permission::where('name','not like','permission%')->where('name','not like','role%')->orderBy('name')->get();
         $rolePermissions = DB::table("role_has_permissions")->where("role_has_permissions.role_id",$id)
             ->pluck('role_has_permissions.permission_id','role_has_permissions.permission_id')
             ->all();
@@ -119,10 +120,16 @@ class RoleController extends Controller
     public function destroy($id)
     {
         
-            Role::find($id)->delete();
-        
-            return redirect()->route('roles.index')
+            $role = Role::find($id);
+            if($role->users()->count()==0){
+                $role->permissions()->delete();
+                $role->delete();
+                return redirect()->route('roles.index')
             ->with('success', 'Role deleted successfully');
+            }
+                    
+            return redirect()->route('roles.index')
+            ->with('warning', 'Role can not be deleted');
        
         
     }

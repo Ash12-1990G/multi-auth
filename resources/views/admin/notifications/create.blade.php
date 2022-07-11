@@ -1,6 +1,7 @@
 @extends('admin.layouts.backend')
 @push('styles')
 <link rel="stylesheet" href="{{ asset('plugins/select2/css/select2.min.css') }}">
+<link rel="stylesheet" href="{{ asset('plugins/toastr/toastr.min.css') }}">
 <style>
     .select2-container{
         width:100% !important;
@@ -27,11 +28,11 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-lg-12">
-            <form action={{route('notifications.store')}} method="post">
+            <form class="form-normal" action={{route('notifications.store')}} method="post">
             @csrf
             <div class="card card-primary card-outline">
                 <div class="card-header">
-                    <h3 class="card-title">Compose New Message</h3>
+                    <h3 class="card-title">New Notice</h3>
                 </div>
               <!-- /.card-header -->
                 <div class="card-body">
@@ -42,13 +43,14 @@
                 @endif -->
                     <div class="row">
                         <div class="form-group col-md-8">
-                        <!-- <div class="button-container">
-                        <button type="button" onclick="selectAll()">Select All</button>
-                        <button type="button" onclick="deselectAll()">Deselect All</button>
-                        </div> -->
+                        
                         <select class="select2 form-control {{ $errors->has('customers') ? ' is-invalid' : '' }}" placeholder="To:" name="customers[]" multiple="multiple">
-                            <option value="all">Select All Customers</option>
+                               
+                            <option value="1">Select All Customers</option>
+                           
                         </select>
+                       
+                        
                         @if ($errors->has('customers'))
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $errors->first('customers') }}.</strong>
@@ -72,7 +74,7 @@
                             
                         </div>
                         <div class="form-group col-md-12">
-                        <input class="form-control {{ $errors->has('subject') ? ' is-invalid' : '' }}" placeholder="Subject:" name="subject">
+                        <input class="form-control {{ $errors->has('subject') ? ' is-invalid' : '' }}" placeholder="Subject:" name="subject" value="{{ old('subject') }}">
                         @if ($errors->has('subject'))
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $errors->first('subject') }}.</strong>
@@ -80,7 +82,7 @@
                                 @endif
                         </div>
                         <div class="form-group col-md-12">
-                        <textarea class="form-control {{ $errors->has('message') ? ' is-invalid' : '' }}" placeholder="write here" name="message"></textarea>
+                        <textarea class="form-control {{ $errors->has('message') ? ' is-invalid' : '' }}" placeholder="write here" name="message">{{ old('subject') }}</textarea>
                         @if ($errors->has('message'))
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $errors->first('message') }}.</strong>
@@ -94,7 +96,6 @@
               <!-- /.card-body -->
               <div class="card-footer">
                 <div class="float-right">
-                  <button type="button" class="btn btn-default"><i class="fas fa-pencil-alt"></i> Draft</button>
                   <button type="submit" class="btn btn-primary"><i class="far fa-envelope"></i> Send</button>
                 </div>
                 
@@ -107,29 +108,136 @@
     </div>
 </div>
 @endsection
-@section('scripts')>
+@section('scripts')
+
+
 <script src="{{ asset('plugins/select2/js/select2.full.min.js') }}"></script>
+<script src="{{ asset('plugins/toastr/toastr.min.js') }}"></script>
+
+@if($msg = session('success'))
+<script type="text/javascript">
+  tosterMessage('success',"{{$msg}}")
+ 
+</script>
+@endif
+@if($msg = session('warning'))
+<script type="text/javascript">
+  tosterMessage('error',"{{$msg}}")
+ 
+</script>
+@endif
 <script type="text/javascript">
 $.ajaxSetup({
     headers: {
         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
     }
 });
+var customers = [];
 </script>
+@if (is_array(old('customers')))
 <script type="text/javascript">
-    
-    $('.select2').select2({
+customers = @json(old('customers'));
+if(customers.length>0){
+    if(customers.includes(1)){
+        var newOption = new Option('Select all the customer', 1, false, true);
+                        $('.select2').append(newOption).trigger('change');
+    }
+    else{
+        $.ajax({
+            type:'GET',
+            url: '{!! route('notifications.searchbycustomer') !!}',
+            dataType:'json',
+            data:{itemselect: customers},
+        }).then(function (data) {
+            console.log(data);
+        var res = $.map(data, function (item) {
+                cname=item.customers['cust_name']+' ('+item.name+'-'+item.customers['center_code']+')';
+                
+                return {
+                    text: cname,
+                    id: item.id,
+                    selected: true,
+                };
+            });
+            
+            studentSelect.select2({
         placeholder: 'Select Customers',
-        multiple:true,
+    multiple: true,
         ajax: {
             url: '{!! route('notifications.searchbycustomer') !!}',
             dataType: 'json',
             delay: 250,
+            
             processResults: function (data) {
                 var cname = '';
                 console.log(data);
                     var i=0;
-                    var vals=[]
+                    var vals=[];
+               res = $.map(data, function (item) {
+                    //console.log(item.customers['center_code']);
+                            cname=item.customers['cust_name']+' ('+item.name+'-'+item.customers['center_code']+')';
+                        if(i===0){
+                            i++;
+                        return vals=  [{
+                                text: 'Select all the customer',
+                                id: 1,
+                                selected: false,
+                            },
+                            {
+                                text: cname,
+                                id: item.id,
+                                selected: false,
+                            }];
+                            
+                        }
+                        
+                        if(i>0){
+                            i++;
+                                return {
+                                text: cname,
+                                id: item.id,
+                                selected: false,
+                            }
+                        }
+                        
+                    });
+                    console.log(res); 
+                return {
+                    
+                    results: res
+                    
+
+                };
+            },
+            cache: true
+        },
+        data:res,
+    }).trigger('change');
+           
+        });
+        
+    }
+}
+
+</script>
+
+@endif
+
+<script type="text/javascript">
+    var studentSelect = $('.select2');
+    studentSelect.select2({
+        placeholder: 'Select Customers',
+    multiple: true,
+        ajax: {
+            url: '{!! route('notifications.searchbycustomer') !!}',
+            dataType: 'json',
+            delay: 250,
+            
+            processResults: function (data) {
+                var cname = '';
+                console.log(data);
+                    var i=0;
+                    var vals=[];
                res = $.map(data, function (item) {
                     //console.log(item.customers['center_code']);
                             cname=item.customers['cust_name']+' ('+item.name+'-'+item.customers['center_code']+')';
@@ -181,4 +289,5 @@ $.ajaxSetup({
            }
       });
 </script>
+
 @endsection

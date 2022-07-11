@@ -36,9 +36,7 @@
                     <tr>
                       <th style="width: 10px">#</th>
                       <th>Franchise</th>
-                      <th>Duration</th>
                       <th>Cost</th>
-                      <th>Discount(in %)</th>
                       <th style="width: 280px">Action</th>
                     </tr>
                   </thead>
@@ -89,20 +87,13 @@
                     name: 'franchise',
                     width: '30%'
                 },
-                {
-                    data: 'duration',
-                    name: 'duration'
-                },
+               
                 {
                     data: 'cost',
                     name: 'cost',
-                    width: '10%'
+                    width: '30%'
                 },
-                {
-                    data: 'discount(in %)',
-                    name: 'discount(in %)',
-                    width: '20%'
-                },
+                
                 {
                     data: 'action',
                     name: 'action'
@@ -114,6 +105,11 @@
 @if($msg = session('success'))
 <script type="text/javascript">
   swal("Great job!","{{$msg}}",'success');
+</script>
+@endif
+@if($msg = session('warning'))
+<script type="text/javascript">
+  swal("Sorry!","{{$msg}}",'warning');
 </script>
 @endif
 @endsection

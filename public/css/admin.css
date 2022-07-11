@@ -5,6 +5,7 @@
   height: 100%;
   position: fixed;
   background: #22222269;
+  z-index:1;
  
 }
 .text-less-dark{

@@ -10,12 +10,4 @@ class QueuedVerifyEmail extends VerifyEmail implements ShouldQueue
 {
     use Queueable;
 
-    /**
-     * Create a new notification instance.
-     *
-     * @return void
-     */
-   
-
-    
 }

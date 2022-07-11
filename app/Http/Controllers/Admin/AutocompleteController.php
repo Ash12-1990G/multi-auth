@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Franchise;
 use Illuminate\Http\Request;
-use DB;
+use Illuminate\Support\Facades\DB;
 
 class AutocompleteController extends Controller
 {
@@ -24,7 +24,7 @@ class AutocompleteController extends Controller
         if($request->has('editval') && $request->has('editval')!=''){
             $editval = $search = $request->editval;
         }
-        //dd(json_encode($data));
+        
         
         return response()->json($data);
         

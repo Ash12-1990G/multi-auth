@@ -15,6 +15,7 @@ class Course extends Model
         'slug',
         'description',
         'price',
+        'image',
         'meta_title',
         'meta_description'
     ];
@@ -32,5 +33,18 @@ class Course extends Model
     }
     public function franchises(){
         return $this->belongsTo(Franchise::class,'franchise_id');
+    }
+    public function students(){
+        return $this->belongsToMany(Student::class,'course_student')
+        
+        ->withPivot('id','roll_no', 'start_date','price','discount')
+        ->withTimestamps();
+    }
+   
+    public function users()
+    {
+        return $this->belongsToMany(User::class,'reviews','course_id','user_id')
+        ->withPivot('id','user_id','course_id','rating','comment','created_at')
+        ->withTimestamps();
     }
 }

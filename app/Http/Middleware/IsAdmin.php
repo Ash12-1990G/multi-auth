@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Spatie\Permission\Models\Role as ModelsRole;
 
 class IsAdmin
 {
@@ -19,7 +20,9 @@ class IsAdmin
     {
        
         if (Auth::check()) {
-            if(Auth::user()->hasRole(['super-admin']))
+            $otherRoles = ModelsRole::whereNotIn('name', ['Franchise-Admin','Student-Admin'])->pluck('name')->toArray();
+            //dd($otherRoles);
+            if(Auth::user()->hasAnyRole($otherRoles))
             {
                 //return redirect(route('admin.dashboard'));
                 return $next($request);

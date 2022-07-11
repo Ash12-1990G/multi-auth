@@ -11,6 +11,14 @@ use Yajra\DataTables\Facades\DataTables;
 
 class FranchiseController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:customer-franchise-list', ['only' => ['index','getFranchise']]);
+        $this->middleware('permission:customer-franchise-show', ['only' => ['show']]);
+        $this->middleware('permission:customer-franchise-add', ['only' => ['create','store']]);
+        $this->middleware('permission:customer-franchise-edit', ['only' => ['edit','update']]);
+        $this->middleware('permission:customer-franchise-delete', ['only' => ['destroy']]);
+    }
     public function index(Request $request){
         if(request()->ajax()){
             return self::getFranchise();
@@ -26,17 +34,16 @@ class FranchiseController extends Controller
         ->editColumn('franchise', function($row){
             return '<span class="text-primary">'.$row->name.' </span> <br><span class="text-muted">'.$row->subname.'</span>';
         })
-        ->editColumn('duration', function($row){
-            return '<span class="text-danger font-weight-bold">'.$row->service_period.' '.$row->service_interval.'</span>';
-        })
+        // ->editColumn('duration', function($row){
+        //     return '<span class="text-danger font-weight-bold">'.$row->service_period.' '.$row->service_interval.'</span>';
+        // })
         ->editColumn('cost', function($row){
             return '<span class="text-success font-weight-bold"><i class="fas fa-rupee-sign"></i> '.$row->cost.'</span>';
         })
-        ->editColumn('discount(in %)', function($row){
-            return '<span class="text-danger font-weight-bold"> '.$row->cost.'</span>';
-        })
+        
         ->addColumn('action', function($row) use ($user){
             $btn = '';
+                 
                 if ($user->can('franchise-show')) {
                     $btn .= '<a class="btn btn-success btn-sm" href="'.route('franchises.show',$row->id).'">Show</a> ';
                 } 
@@ -51,7 +58,7 @@ class FranchiseController extends Controller
                 } 
             return $btn;
         })
-        ->rawColumns(['franchise','duration','cost','discount(in %)','action'])
+        ->rawColumns(['franchise','cost','action'])
         ->make(true);
     }
     public function create(){
@@ -63,8 +70,9 @@ class FranchiseController extends Controller
             'subname'=> 'required',
             'details' => 'required',
             'cost' => 'required|regex:/^\d+(\.\d{1,2})?$/',
-            'discount' => 'nullable|regex:/^\d+(\.\d{1,2})?$/|min:1|digits_between: 1,99',
+            
         ]);
+        //'discount' => 'nullable|regex:/^\d+(\.\d{1,2})?$/|min:1|digits_between: 1,99',
         $input = $request->all();
         //dd($input);
         if ($request->hasFile('image')) {
@@ -84,9 +92,10 @@ class FranchiseController extends Controller
         }
         
         $input['franchise_code'] = '';
+
         $added_franchise = Franchise::create($input);
-        $unique_code['franchise_code'] =  'FCH'.date('Y'). str_pad($added_franchise->id, 5, '0', STR_PAD_LEFT);
-        $added_franchise->save($unique_code);
+        $added_franchise['franchise_code'] =  'FCH'.date('Y'). str_pad($added_franchise->id, 5, '0', STR_PAD_LEFT);
+        $added_franchise->save();
         return redirect()->route('franchises.index')
                         ->with('success','Franchise created successfully');
         
@@ -108,7 +117,7 @@ class FranchiseController extends Controller
             'subname'=> 'required|unique:courses,code',
             'details' => 'required',
             'cost' => 'required|regex:/^\d+(\.\d{1,2})?$/',
-            'discount' => 'nullable|regex:/^\d+(\.\d{1,2})?$/|min:1|digits_between: 1,99',
+            
         ]);
         $input = $request->all();
         $franchise = Franchise::find($id);
@@ -142,15 +151,19 @@ class FranchiseController extends Controller
     public function destroy($id)
     {
         $franchise = Franchise::findOrFail($id);
-        $orignal_image = $franchise->image;
-            if($orignal_image!==NULL){
-                $exists = Storage::exists('franchise/'. $orignal_image);
-                if ($exists) {
-                    Storage::delete('franchise/'.$orignal_image);
+        $course = $franchise->courses()->count();
+        if($course==0){
+            $orignal_image = $franchise->image;
+                if($orignal_image!==NULL){
+                    $exists = Storage::exists('franchise/'. $orignal_image);
+                    if ($exists) {
+                        Storage::delete('franchise/'.$orignal_image);
+                    }
                 }
-            }
-        $franchise->delete();
+            $franchise->delete();
 
-        return redirect()->route('franchises.index')->with('success', 'Franchise successfully deleted');
+            return redirect()->route('franchises.index')->with('success', 'Franchise successfully deleted');
+        }
+        return redirect()->route('franchises.index')->with('warning', 'Franchise can not be deleted.');
     }
 }

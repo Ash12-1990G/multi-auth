@@ -17,14 +17,24 @@
                             {{ __('A fresh verification link has been sent to your email address.') }}
                         </div>
                     @endif
+                    @if ($msg = session('message'))
+                        <div class="alert alert-success" role="alert">
+                            {{ $msg }}
+                        </div>
+                    @endif
 
                     {{ __('Before proceeding, please check your email for a verification link.') }}
                     {{ __('If you did not receive the email') }},
-                    <form class="d-inline" method="POST" action="@if(request()->user()->hasRole('Student-Admin'))
-                    {{ route('student.verification.send') }}
-                    @elseif(request()->user()->hasRole('Franchise-Admin'))
-                    {{ route('customer.verification.send') }}
-                    @endif">
+                    @php
+                    if(request()->user()->hasRole('Student-Admin')){
+                        $route = 'student.verification.send';
+                    }
+                    else if(request()->user()->hasRole('Franchise-Admin')){
+                    $route = 'customer.verification.send';
+                   }
+                    
+                    @endphp
+                    <form class="d-inline" method="POST" action="{{ route($route) }}">
                         @csrf
                         <button type="submit" class="btn btn-link p-0 m-0 align-baseline">{{ __('click here to request another') }}</button>.
                     </form>

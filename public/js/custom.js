@@ -18,6 +18,7 @@ $('.permission').on('click', function() {
 });
 $('.read-notification').click(function(e){
     e.preventDefault();
+
     var arr = $('input[name="read[]"]:checked').map(function(){
         return $(this).val();
       }).get();
@@ -108,6 +109,7 @@ $('.read-notification').click(function(e){
 
   $('.delete-notification').click(function(e){
     e.preventDefault();
+
     var arr = $('input[name="read[]"]:checked').map(function(){
         return $(this).val();
       }).get();

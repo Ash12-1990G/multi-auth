@@ -6,29 +6,51 @@ use App\Http\Controllers\Controller;
 use App\Models\Student;
 use App\Models\User;
 use App\Jobs\SendEmailJob;
+use App\Modules\Customer\CustomerService;
+use App\Modules\Student\StudentService;
 use App\Rules\IdentityCheck;
+use Barryvdh\DomPDF\Facade\Pdf as PDF;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
-Use Image;
-use Intervention\Image\Exception\NotReadableException;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Validation\Rule;
 
+
 class StudentController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:student-list', ['only' => ['index','getDatatable']]);
+        $this->middleware('permission:student-show', ['only' => ['show']]);
+        $this->middleware('permission:student-add', ['only' => ['create','store']]);
+        $this->middleware('permission:student-add|student-edit', ['only' => ['customerSearchcustomerSearch']]);
+        $this->middleware('permission:student-edit', ['only' => ['edit','update']]);
+        $this->middleware('permission:student-delete', ['only' => ['destroy']]);
+    }
     public function index(Request $request)
     {
         // $user = User::find(11);
         // $user->sendEmailVerificationNotification();
-        
+       
         if(request()->ajax()){
             return self::getDatatable();
         };
         return view('admin.students.index');
     }
     public function getDatatable(){
-        $data = Student::with('users')->orderBy('id','ASC')->get();
+        $check = auth()->user()->hasRole('Franchise-Admin');
+        if($check){
+            $model = new CustomerService();
+            $customer = $model->getCustomerByUserId(auth()->user()->id);
+            $data = Student::with('users')->where('customer_id',$customer->id)->get();
+        }
+        else{
+            $data = Student::with('users')->with(['customers'=>function($q){
+                $q->with('users:id,name');
+            }])->orderBy('id','ASC')->get();
+        }
+        
         $user = auth()->user();
         return DataTables::of($data)
         ->addIndexColumn()
@@ -38,7 +60,6 @@ class StudentController extends Controller
             }
             return '<span class="username">'.$row->users->name.'</span>';
                 
-            
         })
         ->editColumn('email', function($row){
             return '<i class="fas fa-envelope text-primary "></i> '.$row->users->email;
@@ -46,40 +67,76 @@ class StudentController extends Controller
         ->editColumn('phone', function($row){
             return '<i class="fas fa-phone text-danger"></i> '.$row->phone.' '.$row->alt_phone;
         })
+        
+        ->editColumn('center', function($row){
+            return '<i class="fas fa-university text-primary "></i> '.$row->customers->users->name;
+        })
+        
+        
         ->addColumn('action', function($row) use ($user){
             $btn = '';
-                if ($user->can('student-course-show')) {
-                    $btn .= '<a class="btn btn-warning btn-sm" href="'.route('studentcourses.index',['student_id'=>$row->id]).'">Courses</a> ';
+            if($user->hasRole('Franchise-Admin')){
+                $icardurl =  'customer.student.icard';
+                $editUrl = 'customer.students.edit';
+                $destroyUrl = 'customer.students.destroy';
+                $showUrl ='customer.students.show';
+                $courseUrl = 'customer.studentcourses.index';
+            }
+            else{
+                $icardurl =  'student.icard';
+                $editUrl = 'students.edit';
+                $destroyUrl = 'customer.students.destroy';
+                $showUrl ='students.show';
+                $courseUrl = 'studentcourses.index';
+            }
+                if ($user->can('student-course-list')) {
+                    $btn .= '<a class="btn btn-warning btn-sm" href="'.route($courseUrl,['student_id'=>$row->id]).'">Courses</a> ';
                 }
+               
+                
+                if($row->image!=null){
+                    $btn .= '<a class="btn btn-info btn-sm" href="'.route($icardurl,['student'=>$row->id]).'">icard</a> ';
+                }
+                
+                
                 if ($user->can('student-show')) {
-                    $btn .= '<a class="btn btn-success btn-sm" href="'.route('students.show',$row->id).'">Show</a> ';
+                    $btn .= '<a class="btn btn-success btn-sm" href="'.route($showUrl,$row->id).'">Show</a> ';
                 } 
                 if ($user->can('student-edit')) {
-                    $btn .= '<a class="btn btn-primary btn-sm" href="'.route('students.edit',$row->id).'"><i class="fas fa-pencil-alt"></i></a> ';
+                    $btn .= '<a class="btn btn-primary btn-sm" href="'.route($editUrl,$row->id).'"><i class="fas fa-pencil-alt"></i></a> ';
                 } 
                 if ($user->can('student-delete')) {
-                    $btn .= \Form::open(['method' => 'DELETE','route' => ['students.destroy', $row->id],'style'=>'display:inline']) .
+                    $btn .= \Form::open(['method' => 'DELETE','route' => [$destroyUrl, $row->id],'style'=>'display:inline']) .
                     \Form::button('<i class="fas fa-trash"></i>', ['type' => 'submit','class'=>'btn btn-danger btn-sm']).
                     \Form::close();
                     
                 } 
             return $btn;
         })
-        ->rawColumns(['name','email','phone','action'])
+        ->rawColumns(['name','email','phone','center','action'])
         ->make(true);
     }
     public function create(){
         return view('admin.students.create');
     }
     public function show($id){
-        $student = Student::with('users')->find($id);
-        //dd($student);
+        if(auth()->user()->hasRole('Franchise-Admin')){
+            $student = Student::with('users:id,name,email')->whereHas('customers',function($q){
+                $q->with('users:id,name')->where('id',auth()->user()->customers->id);
+            })->find($id);
+        }
+        else{
+            $student = Student::with('users:id,name,email')->find($id);
+            
+        }        
         return view('admin.students.show',compact('student'));
     }
     
     public function store(Request $request)
     {
         $messages = [
+            'customer_id.required' => 'Select any center',
+            'customer_id.exists' => 'Selected center do not exist.',
             'address1.required' => 'The address field is required.',
             'state1.required' => 'The address field is required.',
             'city1.required' => 'The city field is required.',
@@ -97,6 +154,7 @@ class StudentController extends Controller
             'phone' => ['regex:/^(\+)[1-9]{1}([0-9][\s]*){9,16}$/'],
             'birth' => ['regex:/^(\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01]))$/'],
             'admission' => ['regex:/^(\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01]))$/'],
+            'customer_id'=>['required','exists:customers,id'],
             'gender' => 'required',
             'alt_phone' => ['nullable','regex:/^(\+)[1-9]{1}([0-9][\s]*){9,16}$/'],
             'father_name' => ['required','regex:/^([a-zA-Z0-9]+|[a-zA-Z0-9]+\s{1}[a-zA-Z0-9]{1,}|[a-zA-Z0-9]+\s{1}[a-zA-Z0-9]{3,}\s{1}[a-zA-Z0-9]{1,})$/'],
@@ -133,6 +191,7 @@ class StudentController extends Controller
         $user = User::create($input);
         $user->assignRole('Student-Admin');
         $student['user_id'] = $user->id;
+        $student['customer_id'] = $request->input('customer_id');
         $student['admission'] = $request->input('admission');
         $student['phone'] = $request->input('phone');
         $student['birth'] = $request->input('birth');
@@ -176,17 +235,68 @@ class StudentController extends Controller
         dispatch(new SendEmailJob($mailData));
         //dispatching to verify email to queue
         $user->sendEmailVerificationNotification();
-        return redirect()->route('students.index')
-                        ->with('success','Student created successfully');
+        if(auth()->user()->hasRole('Franchise-Admin')){
+            return redirect()->route('customer.students.index')->with('success','Student created successfully');  
+        }
+        return redirect()->route('students.index')->with('success','Student created successfully');
     }
     public function edit($id){
-        $user = Student::findOrFail($id);
+        if(auth()->user()->hasRole('Franchise-Admin')){
+            $user = Student::with(['customers'=>function($q){
+                $q->with('users:id,name');
+            }])->where('customer_id',auth()->user()->customers->id)->findOrFail($id); 
+        }
+        else{
+            $user = Student::with(['customers'=>function($q){
+                $q->with('users:id,name');
+            }])->findOrFail($id);
+        }
         //dd($user->user->phone);
         return view('admin.students.edit',compact('user'));
     }
+    public function customerSearch(Request $request){
+        $data = [];
+        if($request->has('q')){
+            $search = $request->input('q');
+            $service = new CustomerService();
+            $data = $service->getCustomerByName($search);
+        }
+        return response()->json($data);
+        
+    }
+    public function printId($student)
+    {
+        $model = new StudentService();
+        if(auth()->user()->hasRole('Franchise-Admin')){
+            $data = $model->getNameIdWithCustomer($student);
+        }
+        else{
+            
+            $data = $model->getNameId($student);
+        }
+        if($data->image!=null){
+            $pdf = PDF::loadView('student.id-card-view', compact('data'));
+            $pdf->setPaper('A4', '');
+            $filename = $data->users->name. "-" . str_pad($data->id + 1, 4, '0', STR_PAD_LEFT) . '.pdf';
+            return $pdf->stream($filename);
+        }
+        return redirect()->back()->with('warning','Sorry! you can not download the IDCARD');
+        
+      
+        
+    }
+   
     public function update(Request $request, $id){
-        $student = Student::find($id);
+        if(auth()->user()->hasRole('Franchise-Admin')){
+            $student = Student::where('customer_id',auth()->user()->customers->id)->findOrFail($id);
+        }
+        else{
+            $student = Student::findOrFail($id);
+        }
+        
         $messages = [
+            'customer_id.required' => 'Select any center',
+            'customer_id.exists' => 'Selected center do not exist.',
             'address1.required' => 'The address field is required.',
             'state1.required' => 'The address field is required.',
             'city1.required' => 'The city field is required.',
@@ -204,6 +314,7 @@ class StudentController extends Controller
             'phone' => ['regex:/^(\+)[1-9]{1}([0-9][\s]*){9,16}$/'],
             'birth' => ['regex:/^(\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01]))$/'],
             'admission' => ['regex:/^(\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01]))$/'],
+            'customer_id'=>['required','exists:customers,id'],
             'gender' => 'required',
             'alt_phone' => ['nullable','regex:/^(\+)[1-9]{1}([0-9][\s]*){9,16}$/'],
             'father_name' => ['required','regex:/^([a-zA-Z0-9]+|[a-zA-Z0-9]+\s{1}[a-zA-Z0-9]{1,}|[a-zA-Z0-9]+\s{1}[a-zA-Z0-9]{3,}\s{1}[a-zA-Z0-9]{1,})$/'],
@@ -223,10 +334,12 @@ class StudentController extends Controller
 
         
         $input['name'] = $request->input('name');
+       
         $input['email'] = $request->input('email');
         $student['phone'] = $request->input('phone');
         $student['birth'] = $request->input('birth');
         $student['gender'] = $request->input('gender');
+        $student['customer_id'] = $request->input('customer_id');
         $student['alt_phone'] = $request->input('alt_phone');
         $student['admission'] = $request->input('admission');
         $student['father_name'] = $request->input('father_name');
@@ -252,9 +365,9 @@ class StudentController extends Controller
             $orignal_image = $student->getOriginal('image');
             
             if($orignal_image!=NULL){
-                $exists = Storage::exists('public/students/'. $orignal_image);
+                $exists = Storage::exists('students/'. $orignal_image);
                 if ($exists) {
-                    Storage::delete('public/students/'. $orignal_image);
+                    Storage::delete('students/'. $orignal_image);
                 }
             }
             $filenameWithExt = $request->file('image')->getClientOriginalName();
@@ -271,23 +384,51 @@ class StudentController extends Controller
         
         $student->update();
         $student->users()->update($input);
-        return redirect()->route('students.index')
-                        ->with('success','Student updated successfully');
+        if(auth()->user()->hasRole('Franchise-Admin')){
+            return redirect()->route('customer.students.index')->with('success','Student updated successfully');  
+        }
+        return redirect()->route('students.index')->with('success','Student updated successfully');
+    }
+    public function getIcard($student){
+        $model = new StudentService();
+        if(auth()->user()->hasRole('Franchise-Admin')){
+            $data = $model->getStudentByCenter($student);
+        }
+        else{
+            $data = $model->getNameId($student);
+        }
+        
+        return view('student.icardview',compact('data'));
     }
     public function destroy($id)
     {
-        $student = Student::findOrFail($id);
-        
-        $orignal_image = $student->getOriginal('image');
-        if($orignal_image!==NULL){
-            $exists = Storage::exists('public/students/'. $orignal_image);
-            if ($exists) {
-                Storage::delete('public/students/'. $orignal_image);
-            }
+        if(auth()->user()->hasRole('Franchise-Admin')){
+            $student = Student::where('customer_id',auth()->user()->customers->id)->findOrFail($id); 
         }
-        $student->users()->delete();
-        $student->delete();
-
-        return redirect('/students')->with('success', 'Student successfully deleted');
+        else{
+            $student = Student::findOrFail($id);
+        }
+                
+        if($student->courses()->count()==0){
+            $orignal_image = $student->getOriginal('image');
+            if($orignal_image!==NULL){
+                $exists = Storage::exists('students/'. $orignal_image);
+                if ($exists) {
+                    Storage::delete('students/'. $orignal_image);
+                }
+            }
+            $student->users()->removeRole('Student-Admin');
+            $student->users()->reviews()->delete();
+            $student->users()->delete();
+            $student->delete();
+            if(auth()->user()->hasRole('Franchise-Admin')){
+                return redirect()->route('customer.students.index')->with('success','Student deleted successfully');  
+            }
+            return redirect()->route('students.index')->with('success', 'Student successfully deleted');
+        }
+        if(auth()->user()->hasRole('Franchise-Admin')){
+            return redirect()->route('customer.students.index')->with('warning','Student can not be deleted');  
+        }
+        return redirect()->route('students.index')->with('warning', 'Student can not be deleted');
     }
 }

@@ -9,6 +9,12 @@ use Illuminate\Http\Request;
 
 class SyllabusController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:syllabus-show', ['only' => ['show']]);
+        $this->middleware('permission:syllabus-add', ['only' => ['create','store']]);
+        $this->middleware('permission:syllabus-edit', ['only' => ['edit','update']]);
+    }
     public function show($course_id){
         $syllabus =  Syllabus::where('course_id',$course_id)->first();
         $courses =  Course::find($course_id);

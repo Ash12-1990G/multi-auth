@@ -33,20 +33,22 @@
                     <div class="card-body">
                         <div class="post">
                             <div class="user-block">
+                                @if($franchise->image!=NULL)
                                 <span class="mailbox-attachment-icon has-img">
                                     <img class="w-25 img-fluid" src="{{asset('storage/franchise/'.$franchise->image)}}">
                                 </span>
-                                <div class="username mb-2" style="margin-left:26%;">
+                                @endif
+                                <div class="username mb-2" @if($franchise->image!=NULL) style="margin-left:26%;" @else style="margin-left:0;" @endif>
                                     <p class="text-primary mb-0" style="font-size:30px; line-height:30px;">{{ $franchise->name }}</p>
                                     <span class="text-muted" style="font-size:20px;">{{ $franchise->subname }}</span>
                                     
                                 </div>
-                                <div class="description text-success text-md mr-2 mb-2" style="margin-left:26%;"> 
-                                    <h5 class="mb-0"><i class="fas fa-rupee-sign"></i> {{ $franchise->cost }} @if($franchise->discount!==0)
-                                    <span class="badge badge-pill badge-danger">{{ $franchise->discount }} % discount</span></h5>
+                                <div class="description text-success text-md mr-2 mb-2" @if($franchise->image!=NULL) style="margin-left:26%;" @else style="margin-left:0;" @endif> 
+                                    <h5 class="mb-0"> 
+                                    <span class="badge badge-pill badge-danger"><i class="fas fa-rupee-sign"></i> {{ $franchise->cost }}</span></h5>
                                 
-                                    <span class="text-muted"><strong>Prolongation: </strong> {{ $franchise->service_period }} {{ $franchise->service_interval }}</span>
-                                @endif</div>
+                                    <!-- <span class="text-muted"><strong>Prolongation: </strong> {{ $franchise->service_period }} {{ $franchise->service_interval }}</span> -->
+                                </div>
                             </div>
                         </div>
                         
@@ -57,6 +59,7 @@
                     
                 </div>
             </div>
+            @if($course->count()>0)
             <div class="col-md-4">
                 <div class="card card-primary">
                     <div class="card-header">
@@ -99,6 +102,7 @@
                 <!-- /.card-footer -->
                 </div>
             </div>
+            @endif
         </div>
     </div>
 </div>

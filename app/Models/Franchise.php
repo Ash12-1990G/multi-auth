@@ -14,7 +14,6 @@ class Franchise extends Model
         'subname',
         'details',
         'cost',
-        'discount',
         'service_period',
         'service_interval',
         'image',
@@ -30,5 +29,12 @@ class Franchise extends Model
     public function courses()
     {
         return $this->hasMany(Course::class);
+    }
+    public function customers()
+    {
+        return $this->belongsToMany(Customer::class,'customer_franchise')
+        
+        ->withPivot('id','amount','discount','due','payment_option','payment_status','service_taken','service_ends','remarks')
+        ->withTimestamps();
     }
 }

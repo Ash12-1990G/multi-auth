@@ -21,8 +21,9 @@
     @stack('styles')
     <link rel="stylesheet" href="{{ asset('dist/css/adminlte.min.css') }}">
     <!-- Google Font: Source Sans Pro -->
+    
     <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
+    <link href="{{ asset('plugins/summernote/summernote-bs4.css') }}" rel="stylesheet">
     
     <style>
         .dataTables_wrapper .dataTables_processing {
@@ -63,8 +64,37 @@
 <script src="{{ asset('plugins/bs-custom-file-input/bs-custom-file-input.min.js') }}"></script>
 
 <!-- AdminLTE App -->
+<script type="text/javascript">
+    function tosterMessage(status,msg){
+            switch(status){
+                case 'success': toastr.success(msg);break;
+                case 'error': toastr.error(msg);break;
+                default: toastr.success(msg);break;
+            }
+        }
+</script>
+
 
 @yield('scripts')
+<script type="text/javascript">
+    
+    
+    $(function () {
+        $('.form-normal').submit(function () {
+            // if (typeof checkCoordinates === 'function') {
+                
+            //     const [lat,lon]= await checkCoordinates();
+            //     console.log(lat);
+            // }
+                $(':submit').attr('disabled', 'disabled');
+                $('#app').append('<div class="overlay"><div class="overlay__inner"><div class="overlay__content"><span class="spinner"></span></div></div></div>');
+           
+        });
+        
+    });
+    
+</script>
+
 <script src="{{ asset('dist/js/adminlte.min.js') }}"></script>
 
 </body>

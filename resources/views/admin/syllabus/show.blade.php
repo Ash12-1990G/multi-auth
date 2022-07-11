@@ -25,10 +25,14 @@
                 <h3 class="card-title">{{ $courses->name }} </h3>
                 <div class="card-tools">
                     @if(empty($syllabus))
-                <a class="btn btn-primary btn-sm"  href="{{ route('syllabus.create',$courses->id) }}">New Syllabus</a>
-                @else
-                <a class="btn btn-primary btn-sm"  href="{{ route('syllabus.edit',$syllabus->id) }}">Edit Syllabus</a>
-                @endif
+                    @can('syllabus-add')
+                    <a class="btn btn-primary btn-sm"  href="{{ route('syllabus.create',$courses->id) }}">New Syllabus</a>
+                    @endcan
+                    @else
+                    @can('syllabus-edit')
+                    <a class="btn btn-primary btn-sm"  href="{{ route('syllabus.edit',$syllabus->id) }}">Edit Syllabus</a>
+                    @endcan
+                    @endif
                 </div>
 
               </div>

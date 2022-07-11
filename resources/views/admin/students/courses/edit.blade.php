@@ -4,6 +4,7 @@
 
 @endpush
 @section('content')
+
 <div class="content-header">
     <div class="container-fluid">
         <div class="row mb-2">
@@ -12,8 +13,14 @@
             </div><!-- /.col -->
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
-                <li class="breadcrumb-item"><a href="{{route('students.index')}}">Students</a></li>
+                @if(auth()->user()->hasRole('Franchise-Admin'))
+                    <li class="breadcrumb-item"><a href="{{route('customer.students.index')}}">Students</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('customer.studentcourses.index',['student_id'=>$data->student_id]) }}">Student Courses</a></li>
+                    @else
+                    <li class="breadcrumb-item"><a href="{{route('students.index')}}">Students</a></li>
                     <li class="breadcrumb-item"><a href="{{ route('studentcourses.index',['student_id'=>$data->student_id]) }}">Student Courses</a></li>
+                    @endif
+                
                     <li class="breadcrumb-item active">Edit Course</li>
                 </ol>
             </div><!-- /.col -->
@@ -27,7 +34,7 @@
                 <div class="overlay__content"><span class="spinner"></span></div>
             </div>
         </div>
-    <form class="g-3" action={{route('studentcourse.update',$data->id)}} method="post" enctype="multipart/form-data">
+    <form class="form-normalg-3" action="@if(auth()->user()->hasRole('Franchise-Admin')){{route('customer.studentcourses.update',$data->id)}} @else {{route('studentcourse.update',$data->id)}} @endif" method="post" enctype="multipart/form-data">
                     @csrf
                     @method('PATCH')
         <div class="row">
@@ -35,10 +42,22 @@
              
                 <div class="card card-primary">
                     <div class="card-header card-header-custom">
-                        <h3 class="card-title">Select Course</h3>
+                        <h3 class="card-title">Center & Course</h3>
                     </div>
                     
                         <div class="card-body row ">
+                        <div class="form-group col-12">
+                                <input type="hidden" name="student_id" value="{{ $data->id }}">
+                                <label>Select Center</label>
+                                <select class="center-select form-control {{ $errors->has('customer_id') ? ' is-invalid' : '' }}" name="customer_id" required>
+                                    <option value="">Choose Center</option>
+                                </select>
+                                @if ($errors->has('customer_id'))
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $errors->first('customer_id') }}.</strong>
+                                </span>
+                                @endif
+                            </div>
                             <div class="form-group col-12">
                                 <input type="hidden" name="student_id" value="{{ $data->student_id }}">
                                 <label>Select Course</label>
@@ -83,6 +102,21 @@
                             </span>
                             @endif
                         </div>
+                        
+                        <div class="form-group col-12">
+                            
+                            <label  class="form-label">Payment option</label>
+                            
+                            <select name="payment_option" class="form-control {{ $errors->has('payment_option') ? ' is-invalid' : '' }}"  >
+                                <option value="installment" {{(old('payment_option')=='installment' ? 'selected':'') || ($data->concession=='installment' ? 'selected':'')}}>Installment</option>
+                                <option value="full" {{(old('payment_option')=='full' ? 'selected':'') || ($data->concession=='full' ? 'selected':'')}}>Full</option>
+                            </select>
+                            @if ($errors->has('payment_option'))
+                            <span class="invalid-feedback" role="alert">
+                                <strong>{{ $errors->first('payment_option') }}.</strong>
+                            </span>
+                            @endif
+                        </div>
                     </div>
                 </div>
             </div>
@@ -100,6 +134,19 @@
 <script src="{{ asset('plugins/select2/js/select2.full.min.js') }}"></script>
 <script src="{{ asset('plugins/moment/moment.min.js') }}"></script>
 <script src="{{ asset('plugins/daterangepicker/daterangepicker.js') }}"></script>
+@if(auth()->user()->hasRole('Franchise-Admin'))
+<script type="text/javascript">
+var dataUrl = '{!! route('customer.student_course.selected') !!}';
+var courseUrl = '{!! route('customer.studentcourses.autosearch',$data->student_id) !!}';
+var centerUrl = '{!! route('customer.studentcourses.customersearch') !!}';
+</script>
+@else
+<script type="text/javascript">
+var dataUrl = '{!! route('student_course.selected') !!}';
+var courseUrl = '{!! route('studentcourses.autosearch',$data->student_id) !!}';
+var centerUrl = '{!! route('studentcourses.customersearch') !!}';
+</script>
+@endif
 <script type="text/javascript">
   $(function() {
     $( "#datepicker" ).daterangepicker({
@@ -125,7 +172,7 @@ $('.custom-select').on('select2:select', function (e) {
     ele.value = '';
     $.ajax({
         type: 'GET',
-        url: '{!! route('student_course.selected') !!}',
+        url: dataUrl,
         data: data,
         dataType: 'json',
         beforeSend: function(){
@@ -150,22 +197,55 @@ $('.custom-select').on('select2:select', function (e) {
 
 });
 //auto selection select2 via ajax
-$('.custom-select').select2({
-    placeholder: 'Select course',
+$('.center-select').on('select2:select', function (e) { 
+    var data = e.params.data;
+    $('.custom-select').select2({
+        placeholder: 'Select course',
+        allowClear: true,
+        maximumInputLength: 20,
+        
+        ajax: {
+                url: courseUrl,
+                dataType: 'json',
+                delay: 250,
+                
+                processResults: function (data) {
+                    //console.log(data);
+                    var res = $.map(data, function (item) {
+                        
+                            return {
+                                text: item.fullcourse,
+                                id: item.id,
+                                selected: true,
+                            }
+                        })
+                    return {
+                        
+                        results: res
+                        
+
+                    };
+                },
+                cache: true
+            }
+    });
+});
+$('.center-select').select2({
+    placeholder: 'Select Center',
     allowClear: true,
     maximumInputLength: 20,
-    
     ajax: {
-            url: '{!! route('studentcourses.autosearch',$data->student_id) !!}',
+            url: centerUrl,
             dataType: 'json',
+            data:data,
             delay: 250,
-            
             processResults: function (data) {
-                //console.log(data);
+                console.log(data);
+                var name = '';
                 var res = $.map(data, function (item) {
-                    
+                    name = item.users['name']+'('+item.center_code+')';
                         return {
-                            text: item.fullcourse,
+                            text: name,
                             id: item.id,
                             selected: true,
                         }
@@ -181,14 +261,20 @@ $('.custom-select').select2({
         }
   });
   //pre selected course value 
+  var cust = {
+    "id": '{!! $data->students->customer_id !!}',
+        "text": "{{ $data->students->customers->users->name }}",
+        "selected": true,
+    }
   var data = {
     "id": '{!! $data->courses->id !!}',
         "text": "{{ $data->courses->name }}",
         "selected": true,
     }
-  
+    var newOption1 = new Option(cust.text, cust.id, true, true);
+  $('.center-select').append(newOption1).trigger('change');
     var newOption = new Option(data.text, data.id, true, true);
-  $('.custom-select').append(newOption).trigger('change');
+    $('.custom-select').append(newOption).trigger('change');
   </script>
   <script type="text/javascript">
     $(document).ready(function () {
